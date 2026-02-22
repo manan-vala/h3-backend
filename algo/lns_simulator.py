@@ -1,7 +1,7 @@
 from typing import Dict, List, Tuple
 from lns_utils import Employee, Vehicle, DistanceMatrix
 
-class RouteMatrixSimulator:
+class RouteSimulator:
     def __init__(self, employees: Dict[str, Employee], vehicles: Dict[str, Vehicle], 
                  dist_matrix: DistanceMatrix, allow_violations: bool = False):
         self.employees = employees
@@ -13,27 +13,44 @@ class RouteMatrixSimulator:
         self.PENALTY_CAPACITY = 5000000.0  
         self.PENALTY_TIME_WINDOW = 50000.0  
         self.PENALTY_PRIORITY = 2000000.0    
-        self.PENALTY_HARD_UNASSIGNED = 20000.0
+        self.PENALTY_HARD_UNASSIGNED = 20000.0 # Cheaper to drop than to violate safety/time
 
     def simulate_vehicle(self, veh_id: str, groups: List[List[str]]) -> Tuple[bool, Dict]:
+        """
+        Simulate a vehicle route. 
+        """
         vehicle = self.vehicles[veh_id]
-        curr_id = veh_id
+        curr_loc = veh_id
         curr_time = vehicle.available_time
         
         total_distance = 0.0
         total_time = 0.0
         
+        # Soft penalties
         sharing_penalty = 0.0
         vehicle_penalty = 0.0
+        
+        # Violation penalties
         violation_penalty = 0.0
         hard_violation_count = 0
         
         route_details = {}
+        route_sequence = []
         
+        # Add initial vehicle position
+        route_sequence.append({
+            "step": 0,
+            "location": veh_id,
+            "arrival_time": curr_time,
+            "departure_time": curr_time
+        })
+        step_count = 1
+
         for group in groups:
             if not group:
                 continue
                 
+            # --- Check Capacity ---
             if len(group) > vehicle.capacity:
                 if not self.allow_violations:
                     return False, {'error': f'Capacity exceeded'}
@@ -47,16 +64,7 @@ class RouteMatrixSimulator:
             # --- Pickups ---
             for emp_id in group:
                 emp = self.employees[emp_id]
-                dist, duration = self.dist_matrix.get_data(curr_id, emp_id)
-                
-                # If matrix doesn't have it, we might be in trouble, but assume it does.
-                if dist is None:
-                    # Fallback to 0 if not found to avoid crashing, 
-                    # but real data should have it.
-                    dist = 0.0
-                    duration = 0.0
-
-                travel_time = duration
+                dist, travel_time = self.dist_matrix.get_dist_dur(curr_loc, emp_id)
                 arrival_time = curr_time + travel_time
                 pickup_time = max(arrival_time, emp.earliest_pickup)
                 wait_time = pickup_time - arrival_time
@@ -65,20 +73,25 @@ class RouteMatrixSimulator:
                 total_time += travel_time + wait_time
                 
                 curr_time = pickup_time
-                curr_id = emp_id
+                curr_loc = emp_id
                 group_pickups[emp_id] = {'pickup_time': pickup_time, 'wait_time': wait_time}
+                
+                route_sequence.append({
+                    "step": step_count,
+                    "location": emp_id,
+                    "arrival_time": arrival_time,
+                    "departure_time": pickup_time
+                })
+                step_count += 1
             
             # --- Drop-off ---
-            dist_to_hq, duration_to_hq = self.dist_matrix.get_data(curr_id, "office")
-            if dist_to_hq is None:
-                dist_to_hq = 0.0
-                duration_to_hq = 0.0
-
-            travel_time_to_hq = duration_to_hq
-            drop_time = curr_time + travel_time_to_hq
+            # Assumption: All employees in a group are dropped at "office"
+            office_id = "office"
+            dist_to_office, travel_time_to_office = self.dist_matrix.get_dist_dur(curr_loc, office_id)
+            drop_time = curr_time + travel_time_to_office
             
-            total_distance += dist_to_hq
-            total_time += travel_time_to_hq
+            total_distance += dist_to_office
+            total_time += travel_time_to_office
             
             # --- Check Deadlines ---
             for emp_id in group:
@@ -96,8 +109,15 @@ class RouteMatrixSimulator:
                          hard_violation_count += 1
 
             curr_time = drop_time
-            curr_id = "office"
+            curr_loc = office_id
             
+            route_sequence.append({
+                "step": step_count,
+                "location": office_id,
+                "arrival_time": drop_time
+            })
+            step_count += 1
+
             # --- Soft Constraints ---
             group_size = len(group)
             for emp_id in group:
@@ -127,5 +147,6 @@ class RouteMatrixSimulator:
             'vehicle_penalty': vehicle_penalty,
             'violation_penalty': violation_penalty,
             'hard_violation_count': hard_violation_count,
-            'route_details': route_details
+            'route_details': route_details,
+            'route_sequence': route_sequence
         }

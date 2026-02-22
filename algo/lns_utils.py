@@ -1,9 +1,9 @@
 import math
-import json
 from dataclasses import dataclass
 from datetime import time as dtime, datetime
 import pandas as pd
 import os
+from io import BytesIO
 
 @dataclass
 class Employee:
@@ -29,6 +29,21 @@ class Vehicle:
     start_lat: float
     start_lng: float
     available_time: float
+
+class DistanceMatrix:
+    def __init__(self, matrix_edge_list):
+        self.data = {item['id']: item for item in matrix_edge_list}
+
+    def get_dist_dur(self, from_id: str, to_id: str):
+        # Handle "office" as a special case if needed, but matrix should have it
+        key = f"{from_id}_{to_id}"
+        if key in self.data:
+            return self.data[key]['distance_meters'] / 1000.0, self.data[key]['duration_seconds'] / 60.0
+        
+        # If not found, try reverse for some types? 
+        # Usually OSRM matrices are asymmetric, but let's be safe.
+        # However, the user provided matrix should be complete for the requested pairs.
+        return 10000.0, 1000.0 # Large default if missing
 
 def time_to_minutes(t):
     """Handle datetime.time, datetime.datetime, string, or float (fraction of day)"""
@@ -58,13 +73,11 @@ def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
          math.sin(dlon / 2) ** 2)
     return 2 * R * math.asin(math.sqrt(a))
 
-def load_data(excel_path: str):
-    if not os.path.exists(excel_path):
-        raise FileNotFoundError(f"{excel_path} not found")
-
-    emp_df = pd.read_excel(excel_path, sheet_name='employees')
-    veh_df = pd.read_excel(excel_path, sheet_name='vehicles')
-    meta_df = pd.read_excel(excel_path, sheet_name='metadata')
+def load_data_from_bytes(file_bytes: bytes):
+    excel_file = BytesIO(file_bytes)
+    emp_df = pd.read_excel(excel_file, sheet_name='employees')
+    veh_df = pd.read_excel(excel_file, sheet_name='vehicles')
+    meta_df = pd.read_excel(excel_file, sheet_name='metadata')
     
     # Parse max delays
     max_delays = {}
@@ -112,33 +125,11 @@ def load_data(excel_path: str):
         
     return employees, vehicles
 
-class DistanceMatrix:
-    def __init__(self, matrix_path: str):
-        if not os.path.exists(matrix_path):
-            self.matrix = {}
-        else:
-            with open(matrix_path, 'r') as f:
-                data = json.load(f)
-            self.matrix = {item['id']: item for item in data}
+def load_data(excel_path: str):
+    if not os.path.exists(excel_path):
+        raise FileNotFoundError(f"{excel_path} not found")
 
-    def get_data(self, id1: str, id2: str):
-        if id1 == id2:
-            return 0.0, 0.0
-        
-        # In the matrix, office is sometimes used as 'office'
-        # Vehicles are V01, Employees are E01 etc.
-        key1 = f"{id1}_{id2}"
-        key2 = f"{id2}_{id1}"
-        
-        if key1 in self.matrix:
-            item = self.matrix[key1]
-            return item['distance_meters'] / 1000.0, item['duration_seconds'] / 60.0
-        elif key2 in self.matrix:
-            item = self.matrix[key2]
-            return item['distance_meters'] / 1000.0, item['duration_seconds'] / 60.0
-        
-        # Fallback to haversine if not found? 
-        # The user specifically asked to use the matrix.
-        return None, None
-
-import json
+    with open(excel_path, 'rb') as f:
+        file_bytes = f.read()
+    
+    return load_data_from_bytes(file_bytes)

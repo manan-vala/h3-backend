@@ -5,8 +5,8 @@ import time
 import math
 import os
 from collections import defaultdict
-from lns_utils import load_data, Employee, Vehicle, DistanceMatrix
-from lns_matrix_simulator import RouteMatrixSimulator
+from lns_utils import load_data_from_bytes, Employee, Vehicle, DistanceMatrix
+from lns_simulator import RouteSimulator
 from lns_local_search import LocalSearch
 
 W1 = 1 # Cost penalty
@@ -16,15 +16,11 @@ W4 = 2000 # Vehicle Premium penalty
 W5 = 20000 # Unassigned penalty
 W6 = 10000000 # Hard Constraint violation penalty
 
-# Paths relative to the script location or current working dir?
-# The original code used relative paths that might be brittle.
-# I'll use parameters instead.
-
-class LNSMatrixOptimizer:
-    def __init__(self, excel_path, matrix_path, initial_sol_path):
-        self.employees, self.vehicles = load_data(excel_path)
-        self.dist_matrix = DistanceMatrix(matrix_path)
-        self.simulator = RouteMatrixSimulator(self.employees, self.vehicles, self.dist_matrix, allow_violations=True)
+class LNSOptimizer:
+    def __init__(self, file_bytes, matrix_edge_list, initial_sol=None):
+        self.employees, self.vehicles = load_data_from_bytes(file_bytes)
+        self.dist_matrix = DistanceMatrix(matrix_edge_list)
+        self.simulator = RouteSimulator(self.employees, self.vehicles, self.dist_matrix, allow_violations=True)
         
         # Default Weights - penalized heavily to prevent "soft" violations
         self.weights_dict = {'w1': W1, 'w2': W2, 'w3': W3, 'w4': W4}
@@ -35,25 +31,13 @@ class LNSMatrixOptimizer:
         self.w_vehicle = self.weights_dict['w4']
         
         self.local_search = LocalSearch(self.employees, self.vehicles, self.weights_dict, self.simulator)
-        self.current_routes = self.load_solution(initial_sol_path)
+        self.current_routes = initial_sol if initial_sol else {}
         self.best_routes = copy.deepcopy(self.current_routes)
         self.best_score = float('inf')
         
         _, score, _ = self.evaluate(self.current_routes)
         self.best_score = score
-        print(f"Initial Score: {score:.2f}")
-
-    def load_solution(self, path):
-        if not os.path.exists(path): return {}
-        try:
-            with open(path, 'r') as f:
-                raw = json.load(f)
-            routes = {}
-            for k, v in raw.items():
-                if k in self.vehicles:
-                    routes[k] = [g for g in v if g]
-            return routes
-        except Exception: return {}
+        # print(f"Initial Score: {score:.2f}")
 
     def evaluate(self, routes):
         total_cost = 0.0
@@ -114,13 +98,11 @@ class LNSMatrixOptimizer:
         for v, groups in new_routes.items():
             for g in groups: assigned.extend(g)
         if not assigned: return new_routes, []
-        
-        seed_eid = random.choice(assigned)
+        seed = self.employees[random.choice(assigned)]
         dists = []
         for eid in assigned:
-            # Using distance matrix for spatial ruin
-            d, _ = self.dist_matrix.get_data(seed_eid, eid)
-            if d is None: d = float('inf')
+            e = self.employees[eid]
+            d = (e.pickup_lat - seed.pickup_lat)**2 + (e.pickup_lng - seed.pickup_lng)**2
             dists.append((d, eid))
         dists.sort(key=lambda x: x[0])
         removed = [x[1] for x in dists[:num_remove]]
@@ -132,9 +114,9 @@ class LNSMatrixOptimizer:
         for v, groups in new_routes.items():
             for g in groups:
                 for eid in g:
-                    # Worst here defined by distance to office (approximate)
-                    dist, _ = self.dist_matrix.get_data(eid, "office")
-                    if dist is None: dist = 0.0
+                    # Use distance to office as a proxy for "worst" if we want, 
+                    # or just the length of its segment.
+                    dist, _ = self.dist_matrix.get_dist_dur(eid, "office")
                     assigned.append((dist, eid))
         if not assigned: return new_routes, []
         assigned.sort(key=lambda x: x[0], reverse=True)
@@ -242,8 +224,8 @@ class LNSMatrixOptimizer:
             unassigned.remove(eid)
         return current_routes
 
-    def optimize(self, max_iterations=100, destruction_rate=0.2):
-        print(f"Starting Matrix-based LNS optimization for {max_iterations} iterations...")
+    def optimize(self, max_iterations=100):
+        # print(f"Starting Enhanced LNS optimization for {max_iterations} iterations...")
         num_employees = len(self.employees)
         
         # Initial Repair for unassigned
@@ -252,11 +234,11 @@ class LNSMatrixOptimizer:
             for group in groups: all_assigned.update(group)
         initial_unassigned = list(set(self.employees.keys()) - all_assigned)
         if initial_unassigned:
-            print(f"Repairing initial solution with {len(initial_unassigned)} unassigned...")
+            # print(f"Repairing initial solution with {len(initial_unassigned)} unassigned...")
             self.current_routes = self.repair_regret(self.current_routes, initial_unassigned, k=2)
             _, score, _ = self.evaluate(self.current_routes)
             self.best_score, self.best_routes = score, copy.deepcopy(self.current_routes)
-            print(f"Repaired Initial Score: {score:.2f}")
+            # print(f"Repaired Initial Score: {score:.2f}")
 
         T, cooling = 1000.0, 0.995
         for i in range(max_iterations):
@@ -267,23 +249,17 @@ class LNSMatrixOptimizer:
             r_val = random.random()
             if r_val < 0.25:
                 temp_routes, removed = self.destroy_random(temp_routes, num_remove)
-                r_type = "Random"
             elif r_val < 0.50:
                 temp_routes, removed = self.destroy_spatial(temp_routes, num_remove)
-                r_type = "Spatial"
             elif r_val < 0.75:
                 temp_routes, removed = self.destroy_worst(temp_routes, num_remove)
-                r_type = "Worst  "
             else:
                 temp_routes, removed = self.destroy_route(temp_routes, num_remove)
-                r_type = "Route  "
                 
             if random.random() < 0.5:
                 temp_routes = self.repair_greedy(temp_routes, removed)
-                rep_type = "Greedy"
             else:
                 temp_routes = self.repair_regret(temp_routes, removed, k=2)
-                rep_type = "Regret"
             
             assigned_iter = set()
             for gs in temp_routes.values():
@@ -293,33 +269,63 @@ class LNSMatrixOptimizer:
             _, score, metrics = self.evaluate(temp_routes)
             delta = score - self.best_score
             if score < self.best_score:
-                print(f"Iter {i}: NEW BEST! {score:.2f} | {r_type}/{rep_type} | Hard: {metrics['hard_vio_count']}")
+                # print(f"Iter {i}: NEW BEST! {score:.2f} | Hard: {metrics['hard_vio_count']}")
                 self.best_score, self.best_routes, self.current_routes = score, copy.deepcopy(temp_routes), temp_routes
             elif random.random() < math.exp(-delta / max(T, 0.1)):
                 self.current_routes = temp_routes
             T *= cooling
 
-    def save(self, path):
-        out = {k: v for k, v in self.best_routes.items() if v}
-        with open(path, 'w') as f: json.dump(out, f, indent=4)
+    def get_formatted_output(self):
+        output_vehicles = []
+        total_cost_all = 0
+        
+        def format_time_min(minutes):
+            h = int(minutes // 60) % 24
+            m = int(minutes % 60)
+            return f"{h:02d}:{m:02d}"
 
-if __name__ == "__main__":
-    # Example usage
-    EXCEL = "templts/TestCase_TC04.csv" # Or xlsx
-    # CSV might not have multiple sheets. load_data expects multiple sheets.
-    # The user provided TestCase_TC04.csv. I should check if load_data can handle it.
-    # Actually, load_data uses pd.read_excel. 
-    # I'll stick to the paths provided in the original lns_algo.py if possible.
-    
-    # But for a "program" that can be run:
-    import sys
-    excel_path = sys.argv[1] if len(sys.argv) > 1 else "templts/TestCase_TC04.xlsx"
-    matrix_path = sys.argv[2] if len(sys.argv) > 2 else "templts/matrix_edge_list.json"
-    initial_sol = sys.argv[3] if len(sys.argv) > 3 else "Output/input_lns.json"
-    output_sol = sys.argv[4] if len(sys.argv) > 4 else "Output/output_lns.json"
-    
-    if not os.path.exists("Output"): os.makedirs("Output")
-    
-    lns = LNSMatrixOptimizer(excel_path, matrix_path, initial_sol)
-    lns.optimize(max_iterations=100)
-    lns.save(output_sol)
+        for veh_id, groups in self.best_routes.items():
+            if not groups: continue
+            feasible, m = self.simulator.simulate_vehicle(veh_id, groups)
+            vehicle = self.vehicles[veh_id]
+            
+            route_links = []
+            curr = veh_id
+            for group in groups:
+                for eid in group:
+                    route_links.append(f"{curr}_{eid}")
+                    curr = eid
+                route_links.append(f"{curr}_office")
+                curr = "office"
+            
+            # Format route sequence from simulator
+            formatted_sequence = []
+            for step in m['route_sequence']:
+                fs = {
+                    "step": step['step'],
+                    "location": step['location'],
+                    "arrival_time": format_time_min(step['arrival_time'])
+                }
+                if 'departure_time' in step:
+                    fs["departure_time"] = format_time_min(step['departure_time'])
+                formatted_sequence.append(fs)
+
+            output_vehicles.append({
+                "vehicle_id": veh_id,
+                "vehicle_type": vehicle.category,
+                "capacity": vehicle.capacity,
+                "avg_speed_kmph": vehicle.speed,
+                "total_cost": round(m['total_cost'], 2),
+                "total_time_minutes": round(m['total_time'], 2),
+                "total_steps": len(formatted_sequence),
+                "routes": route_links,
+                "route_sequence": formatted_sequence
+            })
+            total_cost_all += m['total_cost']
+
+        return {
+            "vehicles": output_vehicles,
+            "summary": {
+                "total_cost_all_vehicles": round(total_cost_all, 2)
+            }
+        }
