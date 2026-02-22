@@ -4,8 +4,8 @@ from collections import defaultdict
 from typing import Dict, List, Set, Tuple, Optional, Callable
 from dataclasses import dataclass
 
-from lns_utils import Employee, Vehicle
-from lns_simulator import RouteSimulator
+from .lns_utils import Employee, Vehicle
+from .lns_simulator import RouteSimulator
 
 @dataclass
 class Move:

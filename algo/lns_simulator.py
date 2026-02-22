@@ -1,5 +1,5 @@
 from typing import Dict, List, Tuple
-from lns_utils import Employee, Vehicle, DistanceMatrix
+from .lns_utils import Employee, Vehicle, DistanceMatrix
 
 class RouteSimulator:
     def __init__(self, employees: Dict[str, Employee], vehicles: Dict[str, Vehicle], 

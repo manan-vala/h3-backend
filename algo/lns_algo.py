@@ -5,9 +5,9 @@ import time
 import math
 import os
 from collections import defaultdict
-from lns_utils import load_data_from_bytes, Employee, Vehicle, DistanceMatrix
-from lns_simulator import RouteSimulator
-from lns_local_search import LocalSearch
+from .lns_utils import load_data_from_bytes, Employee, Vehicle, DistanceMatrix
+from .lns_simulator import RouteSimulator
+from .lns_local_search import LocalSearch
 
 W1 = 1 # Cost penalty
 W2 = 1 # Time penalty
