@@ -9,7 +9,6 @@ import json
 import os
 from fastapi.middleware.cors import CORSMiddleware
 from auth import router as auth_router, get_current_user
-from io import BytesIO
 
 app = FastAPI()
 
@@ -73,7 +72,6 @@ async def process_routes(
 
         # Read the uploaded Excel file into bytes for the solver
         file_bytes = await file.read()
-        file_io = BytesIO(file_bytes)
             
         result_json = solve_vrp(payload_dict, matrix_edge_list, file_bytes)
         
