@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Form
 from models import OptimizationRequest
 from router import MatrixService
 from logic import generate_routes
@@ -23,9 +23,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Auth in testing phase
 # @app.post("/process-routes", dependencies=[Depends(get_current_user)])
 @app.post("/process-routes")
-async def process_routes(payload: OptimizationRequest):
+async def process_routes(
+    json_data: str = Form(...),
+    file: UploadFile = File(...)
+):
+    # Parse the JSON string into our Pydantic model
+    try:
+        raw = json.loads(json_data)
+        payload = OptimizationRequest(**raw)
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid JSON in json_data: {e}")
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"Validation error: {e}")
+
     # print(payload)
     start_time = time.time()
     
@@ -48,7 +61,7 @@ async def process_routes(payload: OptimizationRequest):
     #     json.dump(matrix_edge_list, f, indent=2)
 
     # 3. Run Optimization (The Algo)
-    #    Passes the parsed input + the edge list
+    #    Passes the parsed input + the edge list + the original Excel file
     try:
         # Convert Pydantic model to dict for the solver
         payload_dict = payload.model_dump()
@@ -56,8 +69,11 @@ async def process_routes(payload: OptimizationRequest):
         
         # with open("payload_dict.json", "w") as f:
         #     json.dump(payload_dict, f, indent=2)
+
+        # Read the uploaded Excel file into bytes for the solver
+        file_bytes = await file.read()
             
-        result_json = solve_vrp(payload_dict, matrix_edge_list)
+        result_json = solve_vrp(payload_dict, matrix_edge_list, file_bytes)
         
         # with open("algo_output.json", "w") as f:
         #     json.dump(result_json, f, indent=2)
