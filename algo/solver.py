@@ -23,28 +23,28 @@ def solve_vrp(input_data, matrix_edge_list, file_bytes):
     """
     solutions = []
     
-    # 1. LNS Solver
-    try:
-        lns = LNSOptimizer(file_bytes, matrix_edge_list)
-        lns.optimize(max_iterations=100)
-        solutions.append(("LNS", lns.get_formatted_output()))
-    except Exception as e:
-        print(f"LNS Solver failed: {e}")
+    # # 1. LNS Solver
+    # try:
+    #     lns = LNSOptimizer(file_bytes, matrix_edge_list)
+    #     lns.optimize(max_iterations=100)
+    #     solutions.append(("LNS", lns.get_formatted_output()))
+    # except Exception as e:
+    #     print(f"LNS Solver failed: {e}")
 
-    # 2. ALNS Solver (from 16-02.py) – hard 30 s wall-clock timeout
-    try:
-        import concurrent.futures
-        curr_dir = os.path.dirname(__file__)
-        alns_mod = import_custom_module("alns_solver_16_02", os.path.join(curr_dir, "16-02.py"))
-        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
-            fut = pool.submit(alns_mod.solve_alns, input_data, matrix_edge_list, file_bytes)
-            try:
-                alns_res = fut.result(timeout=30)   # 30 s hard cap
-                solutions.append(("ALNS", alns_res))
-            except concurrent.futures.TimeoutError:
-                print("ALNS Solver timed out (>30 s), skipping.")
-    except Exception as e:
-        print(f"ALNS Solver failed: {e}")
+    # # 2. ALNS Solver (from 16-02.py) – hard 30 s wall-clock timeout
+    # try:
+    #     import concurrent.futures
+    #     curr_dir = os.path.dirname(__file__)
+    #     alns_mod = import_custom_module("alns_solver_16_02", os.path.join(curr_dir, "16-02.py"))
+    #     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+    #         fut = pool.submit(alns_mod.solve_alns, input_data, matrix_edge_list, file_bytes)
+    #         try:
+    #             alns_res = fut.result(timeout=30)   # 30 s hard cap
+    #             solutions.append(("ALNS", alns_res))
+    #         except concurrent.futures.TimeoutError:
+    #             print("ALNS Solver timed out (>30 s), skipping.")
+    # except Exception as e:
+    #     print(f"ALNS Solver failed: {e}")
 
     # 3. VROOM Solver
     try:

@@ -32,28 +32,43 @@ import subprocess
 import sys
 
 # ── Path to the Python 3.9/3.10 executable that has pyvroom installed ────────
-# Priority: env var  >  this file  >  skip VROOM
-_VROOM_PYTHON = (
-    os.environ.get("VROOM_PYTHON_EXE")          # 1. env var override
-    or r"vroom_env\Scripts\python.exe"           # 2. local venv (relative to h3-backend/)
-    # or r"C:\Python310\python.exe"              # 3. uncomment if using system Python 3.10
-    # or r"C:\ProgramData\Miniconda3\envs\vroom310\python.exe"  # conda
-)
+def get_vroom_python():
+    # 1. Env var override
+    if os.environ.get("VROOM_PYTHON_EXE"):
+        return os.environ.get("VROOM_PYTHON_EXE")
+    
+    # 2. Local venv (relative to h3-backend/)
+    here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    candidates = [
+        os.path.join(here, "vroom_env", "Scripts", "python.exe"), # Windows
+        os.path.join(here, "vroom_env", "bin", "python"),        # Unix
+    ]
+    for c in candidates:
+        if os.path.isfile(c):
+            return c
+            
+    # 3. Fallback to current executable if vroom is present (e.g. on Mac/Linux if installed globally)
+    try:
+        import vroom
+        return sys.executable
+    except ImportError:
+        pass
 
-_BRIDGE_SCRIPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vroom_bridge.py")
+    # Default to what it was before if nothing found (will likely fail with error message)
+    return os.path.join(here, "vroom_env", "Scripts", "python.exe") if os.name == 'nt' else os.path.join(here, "vroom_env", "bin", "python")
+
+_BRIDGE_SCRIPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vroom_vio.py")
 
 
 def solve_vroom(input_data, matrix_edge_list, file_bytes):
     """
-    Call vroom_bridge.py in the Python 3.9/3.10 subprocess.
+    Call vroom_vio.py in the Python 3.9/3.10 subprocess.
     Returns a dict in the route_sequence format expected by solver.py.
     Raises RuntimeError if VROOM is unavailable or fails.
     """
-    # Resolve python exe path relative to h3-backend/
-    here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # h3-backend/
-    python_exe = os.path.join(here, _VROOM_PYTHON) if not os.path.isabs(_VROOM_PYTHON) else _VROOM_PYTHON
+    python_exe = get_vroom_python()
 
-    if not os.path.isfile(python_exe):
+    if not os.path.isfile(python_exe) and python_exe != sys.executable:
         raise RuntimeError(
             f"VROOM Python not found at '{python_exe}'. "
             "Run setup: py -3.10 -m venv vroom_env && vroom_env\\Scripts\\pip install pyvroom pandas openpyxl"
@@ -62,6 +77,8 @@ def solve_vroom(input_data, matrix_edge_list, file_bytes):
     # Send input as JSON via stdin (base64-encode the xlsx bytes)
     payload = json.dumps({
         "file_b64": base64.b64encode(file_bytes).decode(),
+        "matrix_edge_list": matrix_edge_list,
+        "input_data": input_data,
         "W1_COST":  0.7,
         "W2_TIME":  0.3,
     })

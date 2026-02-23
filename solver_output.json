@@ -1,276 +1,4200 @@
 {
   "vehicles": [
     {
-      "vehicle_id": "V01",
-      "vehicle_type": "premium",
-      "capacity": 3,
-      "avg_speed_kmph": 28.0,
-      "total_cost": 132.92,
-      "total_time_minutes": 42.44,
-      "total_steps": 7,
+      "vehicle_id": "V001",
+      "vehicle_type": "any",
+      "capacity": 6,
+      "avg_speed_kmph": 44.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
       "routes": [
-        "V01_E02",
-        "E02_E01",
-        "E01_E07",
-        "E07_office",
-        "office_E13",
-        "E13_office"
+        "V001_E013",
+        "E013_office",
+        "office_E046",
+        "E046_office",
+        "office_V001"
       ],
       "route_sequence": [
         {
           "step": 0,
-          "location": "V01",
+          "location": "V001",
           "arrival_time": "08:00",
           "departure_time": "08:00"
         },
         {
           "step": 1,
-          "location": "E02",
-          "arrival_time": "08:00",
-          "departure_time": "08:15"
+          "location": "E013",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
         },
         {
           "step": 2,
-          "location": "E01",
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E046",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V001",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V002",
+      "vehicle_type": "any",
+      "capacity": 2,
+      "avg_speed_kmph": 59.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V002_E148",
+        "E148_office",
+        "office_V002"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V002",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E148",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V002",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V003",
+      "vehicle_type": "premium",
+      "capacity": 4,
+      "avg_speed_kmph": 46.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V003_E074",
+        "E074_office",
+        "office_V003"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V003",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E074",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V003",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V004",
+      "vehicle_type": "any",
+      "capacity": 2,
+      "avg_speed_kmph": 51.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V004_E213",
+        "E213_E211",
+        "E211_office",
+        "office_V004"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V004",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E213",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "E211",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "V004",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V005",
+      "vehicle_type": "premium",
+      "capacity": 6,
+      "avg_speed_kmph": 37.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V005_E044",
+        "E044_office",
+        "office_E130",
+        "E130_office",
+        "office_V005"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V005",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E044",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E130",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V005",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V006",
+      "vehicle_type": "any",
+      "capacity": 2,
+      "avg_speed_kmph": 54.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V006_E161",
+        "E161_office",
+        "office_V006"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V006",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E161",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V006",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V007",
+      "vehicle_type": "premium",
+      "capacity": 2,
+      "avg_speed_kmph": 48.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V007_E149",
+        "E149_office",
+        "office_V007"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V007",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E149",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V007",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V008",
+      "vehicle_type": "normal",
+      "capacity": 4,
+      "avg_speed_kmph": 48.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V008_E053",
+        "E053_E059",
+        "E059_office",
+        "office_V008"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V008",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E053",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "E059",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "V008",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V009",
+      "vehicle_type": "premium",
+      "capacity": 2,
+      "avg_speed_kmph": 50.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V009_E034",
+        "E034_office",
+        "office_E117",
+        "E117_office",
+        "office_V009"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V009",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E034",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E117",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V009",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V010",
+      "vehicle_type": "normal",
+      "capacity": 2,
+      "avg_speed_kmph": 60.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V010_E178",
+        "E178_office",
+        "office_V010"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V010",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E178",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V010",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V011",
+      "vehicle_type": "premium",
+      "capacity": 4,
+      "avg_speed_kmph": 34.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V011_E110",
+        "E110_office",
+        "office_V011"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V011",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E110",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V011",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V012",
+      "vehicle_type": "any",
+      "capacity": 2,
+      "avg_speed_kmph": 52.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V012_E126",
+        "E126_office",
+        "office_V012"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V012",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E126",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V012",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V013",
+      "vehicle_type": "premium",
+      "capacity": 6,
+      "avg_speed_kmph": 50.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V013_E210",
+        "E210_office",
+        "office_V013"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V013",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E210",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V013",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V014",
+      "vehicle_type": "any",
+      "capacity": 4,
+      "avg_speed_kmph": 33.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V014_E206",
+        "E206_office",
+        "office_V014"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V014",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E206",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V014",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V015",
+      "vehicle_type": "premium",
+      "capacity": 2,
+      "avg_speed_kmph": 42.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V015_E191",
+        "E191_E185",
+        "E185_office",
+        "office_V015"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V015",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E191",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "E185",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "V015",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V016",
+      "vehicle_type": "any",
+      "capacity": 2,
+      "avg_speed_kmph": 45.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V016_E205",
+        "E205_E200",
+        "E200_office",
+        "office_V016"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V016",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E205",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "E200",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "V016",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V017",
+      "vehicle_type": "normal",
+      "capacity": 6,
+      "avg_speed_kmph": 51.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V017_E122",
+        "E122_E115",
+        "E115_office",
+        "office_V017"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V017",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E122",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "E115",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "V017",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V018",
+      "vehicle_type": "normal",
+      "capacity": 2,
+      "avg_speed_kmph": 53.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V018_E152",
+        "E152_office",
+        "office_V018"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V018",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E152",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V018",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V019",
+      "vehicle_type": "premium",
+      "capacity": 4,
+      "avg_speed_kmph": 47.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V019_E007",
+        "E007_E005",
+        "E005_office",
+        "office_V019"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V019",
+          "arrival_time": "08:21",
+          "departure_time": "08:21"
+        },
+        {
+          "step": 1,
+          "location": "E007",
+          "arrival_time": "08:51",
+          "departure_time": "08:51"
+        },
+        {
+          "step": 2,
+          "location": "E005",
+          "arrival_time": "09:21",
+          "departure_time": "09:21"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:51",
+          "departure_time": "09:51"
+        },
+        {
+          "step": 4,
+          "location": "V019",
+          "arrival_time": "09:51",
+          "departure_time": "09:51"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V020",
+      "vehicle_type": "any",
+      "capacity": 2,
+      "avg_speed_kmph": 60.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V020_E086",
+        "E086_E085",
+        "E085_office",
+        "office_V020"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V020",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E086",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "E085",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "V020",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V021",
+      "vehicle_type": "premium",
+      "capacity": 2,
+      "avg_speed_kmph": 38.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V021_E184",
+        "E184_E182",
+        "E182_office",
+        "office_V021"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V021",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E184",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "E182",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "V021",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V022",
+      "vehicle_type": "normal",
+      "capacity": 4,
+      "avg_speed_kmph": 56.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V022_E065",
+        "E065_office",
+        "office_E215",
+        "E215_office",
+        "office_V022"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V022",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E065",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E215",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V022",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V023",
+      "vehicle_type": "premium",
+      "capacity": 6,
+      "avg_speed_kmph": 31.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V023_E014",
+        "E014_office",
+        "office_E072",
+        "E072_office",
+        "office_V023"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V023",
+          "arrival_time": "08:11",
+          "departure_time": "08:11"
+        },
+        {
+          "step": 1,
+          "location": "E014",
+          "arrival_time": "08:41",
+          "departure_time": "08:41"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:11",
+          "departure_time": "09:11"
+        },
+        {
+          "step": 3,
+          "location": "E072",
+          "arrival_time": "09:41",
+          "departure_time": "09:41"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:11",
+          "departure_time": "10:11"
+        },
+        {
+          "step": 5,
+          "location": "V023",
+          "arrival_time": "10:11",
+          "departure_time": "10:11"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V024",
+      "vehicle_type": "normal",
+      "capacity": 4,
+      "avg_speed_kmph": 42.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V024_E134",
+        "E134_office",
+        "office_V024"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V024",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E134",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V024",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V025",
+      "vehicle_type": "premium",
+      "capacity": 6,
+      "avg_speed_kmph": 58.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V025_E073",
+        "E073_office",
+        "office_V025"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V025",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E073",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V025",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V026",
+      "vehicle_type": "any",
+      "capacity": 6,
+      "avg_speed_kmph": 57.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V026_E082",
+        "E082_E077",
+        "E077_office",
+        "office_V026"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V026",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E082",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "E077",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "V026",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V027",
+      "vehicle_type": "premium",
+      "capacity": 4,
+      "avg_speed_kmph": 53.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 150.0,
+      "total_steps": 7,
+      "routes": [
+        "V027_E043",
+        "E043_E019",
+        "E019_office",
+        "office_E237",
+        "E237_office",
+        "office_V027"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V027",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E043",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "E019",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "E237",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "office",
+          "arrival_time": "10:30",
+          "departure_time": "10:30"
+        },
+        {
+          "step": 6,
+          "location": "V027",
+          "arrival_time": "10:30",
+          "departure_time": "10:30"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V028",
+      "vehicle_type": "normal",
+      "capacity": 4,
+      "avg_speed_kmph": 43.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V028_E106",
+        "E106_office",
+        "office_V028"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V028",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E106",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V028",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V029",
+      "vehicle_type": "any",
+      "capacity": 2,
+      "avg_speed_kmph": 33.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V029_E163",
+        "E163_office",
+        "office_V029"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V029",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E163",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V029",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V030",
+      "vehicle_type": "premium",
+      "capacity": 6,
+      "avg_speed_kmph": 37.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V030_E188",
+        "E188_office",
+        "office_V030"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V030",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E188",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V030",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V031",
+      "vehicle_type": "any",
+      "capacity": 2,
+      "avg_speed_kmph": 57.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V031_E050",
+        "E050_E052",
+        "E052_office",
+        "office_V031"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V031",
+          "arrival_time": "08:12",
+          "departure_time": "08:12"
+        },
+        {
+          "step": 1,
+          "location": "E050",
+          "arrival_time": "08:42",
+          "departure_time": "08:42"
+        },
+        {
+          "step": 2,
+          "location": "E052",
+          "arrival_time": "09:12",
+          "departure_time": "09:12"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:42",
+          "departure_time": "09:42"
+        },
+        {
+          "step": 4,
+          "location": "V031",
+          "arrival_time": "09:42",
+          "departure_time": "09:42"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V032",
+      "vehicle_type": "any",
+      "capacity": 4,
+      "avg_speed_kmph": 53.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V032_E109",
+        "E109_office",
+        "office_V032"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V032",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E109",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V032",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V033",
+      "vehicle_type": "any",
+      "capacity": 4,
+      "avg_speed_kmph": 49.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V033_E027",
+        "E027_E008",
+        "E008_office",
+        "office_V033"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V033",
           "arrival_time": "08:15",
           "departure_time": "08:15"
         },
         {
-          "step": 3,
-          "location": "E07",
-          "arrival_time": "08:19",
-          "departure_time": "08:19"
-        },
-        {
-          "step": 4,
-          "location": "office",
-          "arrival_time": "08:28",
-          "departure_time": "08:28"
-        },
-        {
-          "step": 5,
-          "location": "E13",
-          "arrival_time": "08:35",
-          "departure_time": "08:35"
-        },
-        {
-          "step": 6,
-          "location": "office",
-          "arrival_time": "08:42"
-        }
-      ]
-    },
-    {
-      "vehicle_id": "V02",
-      "vehicle_type": "premium",
-      "capacity": 3,
-      "avg_speed_kmph": 30.0,
-      "total_cost": 74.79,
-      "total_time_minutes": 56.43,
-      "total_steps": 5,
-      "routes": [
-        "V02_E04",
-        "E04_E15",
-        "E15_E06",
-        "E06_office"
-      ],
-      "route_sequence": [
-        {
-          "step": 0,
-          "location": "V02",
-          "arrival_time": "08:00",
-          "departure_time": "08:00"
-        },
-        {
           "step": 1,
-          "location": "E04",
-          "arrival_time": "08:01",
+          "location": "E027",
+          "arrival_time": "08:45",
           "departure_time": "08:45"
         },
         {
           "step": 2,
-          "location": "E15",
-          "arrival_time": "08:47",
-          "departure_time": "08:47"
-        },
-        {
-          "step": 3,
-          "location": "E06",
-          "arrival_time": "08:47",
-          "departure_time": "08:47"
-        },
-        {
-          "step": 4,
-          "location": "office",
-          "arrival_time": "08:57"
-        }
-      ]
-    },
-    {
-      "vehicle_id": "V03",
-      "vehicle_type": "normal",
-      "capacity": 4,
-      "avg_speed_kmph": 35.0,
-      "total_cost": 97.41,
-      "total_time_minutes": 114.95,
-      "total_steps": 5,
-      "routes": [
-        "V03_E05",
-        "E05_E14",
-        "E14_E12",
-        "E12_office"
-      ],
-      "route_sequence": [
-        {
-          "step": 0,
-          "location": "V03",
-          "arrival_time": "08:00",
-          "departure_time": "08:00"
-        },
-        {
-          "step": 1,
-          "location": "E05",
-          "arrival_time": "08:00",
+          "location": "E008",
+          "arrival_time": "09:15",
           "departure_time": "09:15"
         },
         {
-          "step": 2,
-          "location": "E14",
-          "arrival_time": "09:15",
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:45",
           "departure_time": "09:45"
         },
         {
+          "step": 4,
+          "location": "V033",
+          "arrival_time": "09:45",
+          "departure_time": "09:45"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V034",
+      "vehicle_type": "premium",
+      "capacity": 4,
+      "avg_speed_kmph": 52.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V034_E092",
+        "E092_office",
+        "office_V034"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V034",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E092",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
           "step": 3,
-          "location": "E12",
-          "arrival_time": "09:47",
-          "departure_time": "09:47"
+          "location": "V034",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V035",
+      "vehicle_type": "premium",
+      "capacity": 2,
+      "avg_speed_kmph": 40.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V035_E202",
+        "E202_office",
+        "office_V035"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V035",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E202",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V035",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V036",
+      "vehicle_type": "any",
+      "capacity": 2,
+      "avg_speed_kmph": 36.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V036_E093",
+        "E093_office",
+        "office_V036"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V036",
+          "arrival_time": "08:10",
+          "departure_time": "08:10"
+        },
+        {
+          "step": 1,
+          "location": "E093",
+          "arrival_time": "08:40",
+          "departure_time": "08:40"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:10",
+          "departure_time": "09:10"
+        },
+        {
+          "step": 3,
+          "location": "V036",
+          "arrival_time": "09:10",
+          "departure_time": "09:10"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V037",
+      "vehicle_type": "premium",
+      "capacity": 4,
+      "avg_speed_kmph": 36.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V037_E190",
+        "E190_office",
+        "office_V037"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V037",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E190",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V037",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V038",
+      "vehicle_type": "premium",
+      "capacity": 6,
+      "avg_speed_kmph": 52.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V038_E089",
+        "E089_office",
+        "office_V038"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V038",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E089",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V038",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V039",
+      "vehicle_type": "any",
+      "capacity": 6,
+      "avg_speed_kmph": 58.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V039_E022",
+        "E022_office",
+        "office_E078",
+        "E078_office",
+        "office_V039"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V039",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E022",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E078",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
         },
         {
           "step": 4,
           "location": "office",
-          "arrival_time": "09:55"
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V039",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
         }
       ]
     },
     {
-      "vehicle_id": "V04",
-      "vehicle_type": "normal",
-      "capacity": 6,
-      "avg_speed_kmph": 32.0,
-      "total_cost": 118.1,
-      "total_time_minutes": 127.88,
-      "total_steps": 3,
+      "vehicle_id": "V040",
+      "vehicle_type": "premium",
+      "capacity": 2,
+      "avg_speed_kmph": 31.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
       "routes": [
-        "V04_E09",
-        "E09_office"
+        "V040_E116",
+        "E116_E099",
+        "E099_office",
+        "office_V040"
       ],
       "route_sequence": [
         {
           "step": 0,
-          "location": "V04",
+          "location": "V040",
           "arrival_time": "08:00",
           "departure_time": "08:00"
         },
         {
           "step": 1,
-          "location": "E09",
-          "arrival_time": "08:01",
-          "departure_time": "10:00"
+          "location": "E116",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "E099",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "V040",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V041",
+      "vehicle_type": "normal",
+      "capacity": 2,
+      "avg_speed_kmph": 33.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V041_E061",
+        "E061_office",
+        "office_E214",
+        "E214_office",
+        "office_V041"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V041",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E061",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
         },
         {
           "step": 2,
           "location": "office",
-          "arrival_time": "10:09"
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E214",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V041",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
         }
       ]
     },
     {
-      "vehicle_id": "V05",
+      "vehicle_id": "V042",
       "vehicle_type": "normal",
-      "capacity": 1,
+      "capacity": 4,
       "avg_speed_kmph": 42.0,
-      "total_cost": 123.09,
-      "total_time_minutes": 111.98,
-      "total_steps": 5,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
       "routes": [
-        "V05_E10",
-        "E10_office",
-        "office_E11",
-        "E11_office"
+        "V042_E051",
+        "E051_office",
+        "office_E140",
+        "E140_office",
+        "office_V042"
       ],
       "route_sequence": [
         {
           "step": 0,
-          "location": "V05",
+          "location": "V042",
           "arrival_time": "08:00",
           "departure_time": "08:00"
         },
         {
           "step": 1,
-          "location": "E10",
-          "arrival_time": "08:00",
-          "departure_time": "09:30"
+          "location": "E051",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
         },
         {
           "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E140",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V042",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V043",
+      "vehicle_type": "premium",
+      "capacity": 2,
+      "avg_speed_kmph": 34.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V043_E102",
+        "E102_office",
+        "office_V043"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V043",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E102",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V043",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V044",
+      "vehicle_type": "any",
+      "capacity": 4,
+      "avg_speed_kmph": 43.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V044_E119",
+        "E119_office",
+        "office_V044"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V044",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E119",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V044",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V045",
+      "vehicle_type": "any",
+      "capacity": 4,
+      "avg_speed_kmph": 37.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V045_E121",
+        "E121_office",
+        "office_V045"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V045",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E121",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V045",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V046",
+      "vehicle_type": "normal",
+      "capacity": 2,
+      "avg_speed_kmph": 35.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V046_E157",
+        "E157_E156",
+        "E156_office",
+        "office_V046"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V046",
+          "arrival_time": "08:05",
+          "departure_time": "08:05"
+        },
+        {
+          "step": 1,
+          "location": "E157",
+          "arrival_time": "08:35",
+          "departure_time": "08:35"
+        },
+        {
+          "step": 2,
+          "location": "E156",
+          "arrival_time": "09:05",
+          "departure_time": "09:05"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:35",
+          "departure_time": "09:35"
+        },
+        {
+          "step": 4,
+          "location": "V046",
+          "arrival_time": "09:35",
+          "departure_time": "09:35"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V047",
+      "vehicle_type": "normal",
+      "capacity": 2,
+      "avg_speed_kmph": 46.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V047_E055",
+        "E055_office",
+        "office_E155",
+        "E155_office",
+        "office_V047"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V047",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E055",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E155",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V047",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V048",
+      "vehicle_type": "normal",
+      "capacity": 2,
+      "avg_speed_kmph": 47.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V048_E186",
+        "E186_office",
+        "office_V048"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V048",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E186",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V048",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V049",
+      "vehicle_type": "premium",
+      "capacity": 4,
+      "avg_speed_kmph": 41.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V049_E103",
+        "E103_E097",
+        "E097_office",
+        "office_V049"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V049",
+          "arrival_time": "08:07",
+          "departure_time": "08:07"
+        },
+        {
+          "step": 1,
+          "location": "E103",
+          "arrival_time": "08:37",
+          "departure_time": "08:37"
+        },
+        {
+          "step": 2,
+          "location": "E097",
+          "arrival_time": "09:07",
+          "departure_time": "09:07"
+        },
+        {
+          "step": 3,
           "location": "office",
           "arrival_time": "09:37",
           "departure_time": "09:37"
         },
         {
-          "step": 3,
-          "location": "E11",
-          "arrival_time": "09:44",
-          "departure_time": "09:44"
-        },
-        {
           "step": 4,
-          "location": "office",
-          "arrival_time": "09:51"
+          "location": "V049",
+          "arrival_time": "09:37",
+          "departure_time": "09:37"
         }
       ]
     },
     {
-      "vehicle_id": "V06",
-      "vehicle_type": "normal",
+      "vehicle_id": "V050",
+      "vehicle_type": "any",
       "capacity": 4,
-      "avg_speed_kmph": 34.0,
-      "total_cost": 159.44,
-      "total_time_minutes": 57.12,
-      "total_steps": 4,
+      "avg_speed_kmph": 59.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
       "routes": [
-        "V06_E08",
-        "E08_E03",
-        "E03_office"
+        "V050_E139",
+        "E139_E133",
+        "E133_office",
+        "office_V050"
       ],
       "route_sequence": [
         {
           "step": 0,
-          "location": "V06",
-          "arrival_time": "08:09",
-          "departure_time": "08:09"
+          "location": "V050",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
         },
         {
           "step": 1,
-          "location": "E08",
-          "arrival_time": "08:16",
-          "departure_time": "09:00"
+          "location": "E139",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
         },
         {
           "step": 2,
-          "location": "E03",
-          "arrival_time": "09:04",
-          "departure_time": "09:04"
+          "location": "E133",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
         },
         {
           "step": 3,
           "location": "office",
-          "arrival_time": "09:13"
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "V050",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V051",
+      "vehicle_type": "premium",
+      "capacity": 4,
+      "avg_speed_kmph": 54.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V051_E101",
+        "E101_E087",
+        "E087_office",
+        "office_V051"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V051",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E101",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "E087",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "V051",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V052",
+      "vehicle_type": "normal",
+      "capacity": 4,
+      "avg_speed_kmph": 34.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V052_E088",
+        "E088_office",
+        "office_V052"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V052",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E088",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V052",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V053",
+      "vehicle_type": "premium",
+      "capacity": 2,
+      "avg_speed_kmph": 56.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V053_E009",
+        "E009_office",
+        "office_E038",
+        "E038_office",
+        "office_V053"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V053",
+          "arrival_time": "08:06",
+          "departure_time": "08:06"
+        },
+        {
+          "step": 1,
+          "location": "E009",
+          "arrival_time": "08:36",
+          "departure_time": "08:36"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:06",
+          "departure_time": "09:06"
+        },
+        {
+          "step": 3,
+          "location": "E038",
+          "arrival_time": "09:36",
+          "departure_time": "09:36"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:06",
+          "departure_time": "10:06"
+        },
+        {
+          "step": 5,
+          "location": "V053",
+          "arrival_time": "10:06",
+          "departure_time": "10:06"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V054",
+      "vehicle_type": "any",
+      "capacity": 6,
+      "avg_speed_kmph": 49.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V054_E212",
+        "E212_office",
+        "office_V054"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V054",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E212",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V054",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V055",
+      "vehicle_type": "normal",
+      "capacity": 2,
+      "avg_speed_kmph": 59.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V055_E058",
+        "E058_office",
+        "office_E183",
+        "E183_office",
+        "office_V055"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V055",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E058",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E183",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V055",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V056",
+      "vehicle_type": "premium",
+      "capacity": 6,
+      "avg_speed_kmph": 41.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V056_E165",
+        "E165_office",
+        "office_V056"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V056",
+          "arrival_time": "08:03",
+          "departure_time": "08:03"
+        },
+        {
+          "step": 1,
+          "location": "E165",
+          "arrival_time": "08:33",
+          "departure_time": "08:33"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:03",
+          "departure_time": "09:03"
+        },
+        {
+          "step": 3,
+          "location": "V056",
+          "arrival_time": "09:03",
+          "departure_time": "09:03"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V057",
+      "vehicle_type": "normal",
+      "capacity": 4,
+      "avg_speed_kmph": 44.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V057_E138",
+        "E138_E123",
+        "E123_office",
+        "office_V057"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V057",
+          "arrival_time": "08:01",
+          "departure_time": "08:01"
+        },
+        {
+          "step": 1,
+          "location": "E138",
+          "arrival_time": "08:31",
+          "departure_time": "08:31"
+        },
+        {
+          "step": 2,
+          "location": "E123",
+          "arrival_time": "09:01",
+          "departure_time": "09:01"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:31",
+          "departure_time": "09:31"
+        },
+        {
+          "step": 4,
+          "location": "V057",
+          "arrival_time": "09:31",
+          "departure_time": "09:31"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V058",
+      "vehicle_type": "normal",
+      "capacity": 2,
+      "avg_speed_kmph": 43.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V058_E199",
+        "E199_E195",
+        "E195_office",
+        "office_V058"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V058",
+          "arrival_time": "08:15",
+          "departure_time": "08:15"
+        },
+        {
+          "step": 1,
+          "location": "E199",
+          "arrival_time": "08:45",
+          "departure_time": "08:45"
+        },
+        {
+          "step": 2,
+          "location": "E195",
+          "arrival_time": "09:15",
+          "departure_time": "09:15"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:45",
+          "departure_time": "09:45"
+        },
+        {
+          "step": 4,
+          "location": "V058",
+          "arrival_time": "09:45",
+          "departure_time": "09:45"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V059",
+      "vehicle_type": "normal",
+      "capacity": 4,
+      "avg_speed_kmph": 57.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V059_E016",
+        "E016_office",
+        "office_E075",
+        "E075_office",
+        "office_V059"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V059",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E016",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E075",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V059",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V060",
+      "vehicle_type": "normal",
+      "capacity": 2,
+      "avg_speed_kmph": 46.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V060_E194",
+        "E194_office",
+        "office_V060"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V060",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E194",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V060",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V061",
+      "vehicle_type": "any",
+      "capacity": 4,
+      "avg_speed_kmph": 52.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V061_E098",
+        "E098_office",
+        "office_V061"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V061",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E098",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V061",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V062",
+      "vehicle_type": "premium",
+      "capacity": 4,
+      "avg_speed_kmph": 48.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V062_E003",
+        "E003_office",
+        "office_E006",
+        "E006_office",
+        "office_V062"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V062",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E003",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E006",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V062",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V063",
+      "vehicle_type": "any",
+      "capacity": 2,
+      "avg_speed_kmph": 46.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V063_E180",
+        "E180_office",
+        "office_V063"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V063",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E180",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V063",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V064",
+      "vehicle_type": "premium",
+      "capacity": 4,
+      "avg_speed_kmph": 48.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V064_E025",
+        "E025_office",
+        "office_E083",
+        "E083_office",
+        "office_V064"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V064",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E025",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E083",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V064",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V065",
+      "vehicle_type": "normal",
+      "capacity": 2,
+      "avg_speed_kmph": 57.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V065_E012",
+        "E012_office",
+        "office_E042",
+        "E042_office",
+        "office_V065"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V065",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E012",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E042",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V065",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V066",
+      "vehicle_type": "normal",
+      "capacity": 4,
+      "avg_speed_kmph": 59.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V066_E010",
+        "E010_office",
+        "office_E040",
+        "E040_office",
+        "office_V066"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V066",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E010",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E040",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V066",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V067",
+      "vehicle_type": "any",
+      "capacity": 4,
+      "avg_speed_kmph": 34.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V067_E067",
+        "E067_office",
+        "office_E239",
+        "E239_office",
+        "office_V067"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V067",
+          "arrival_time": "08:11",
+          "departure_time": "08:11"
+        },
+        {
+          "step": 1,
+          "location": "E067",
+          "arrival_time": "08:41",
+          "departure_time": "08:41"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:11",
+          "departure_time": "09:11"
+        },
+        {
+          "step": 3,
+          "location": "E239",
+          "arrival_time": "09:41",
+          "departure_time": "09:41"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:11",
+          "departure_time": "10:11"
+        },
+        {
+          "step": 5,
+          "location": "V067",
+          "arrival_time": "10:11",
+          "departure_time": "10:11"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V068",
+      "vehicle_type": "normal",
+      "capacity": 2,
+      "avg_speed_kmph": 30.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V068_E001",
+        "E001_office",
+        "office_E004",
+        "E004_office",
+        "office_V068"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V068",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E001",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E004",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V068",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V069",
+      "vehicle_type": "premium",
+      "capacity": 2,
+      "avg_speed_kmph": 52.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V069_E164",
+        "E164_office",
+        "office_V069"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V069",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E164",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V069",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V070",
+      "vehicle_type": "premium",
+      "capacity": 4,
+      "avg_speed_kmph": 59.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V070_E136",
+        "E136_office",
+        "office_V070"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V070",
+          "arrival_time": "08:05",
+          "departure_time": "08:05"
+        },
+        {
+          "step": 1,
+          "location": "E136",
+          "arrival_time": "08:35",
+          "departure_time": "08:35"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:05",
+          "departure_time": "09:05"
+        },
+        {
+          "step": 3,
+          "location": "V070",
+          "arrival_time": "09:05",
+          "departure_time": "09:05"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V071",
+      "vehicle_type": "premium",
+      "capacity": 6,
+      "avg_speed_kmph": 40.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V071_E070",
+        "E070_E062",
+        "E062_office",
+        "office_V071"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V071",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E070",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "E062",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "V071",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V072",
+      "vehicle_type": "any",
+      "capacity": 4,
+      "avg_speed_kmph": 49.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V072_E193",
+        "E193_E192",
+        "E192_office",
+        "office_V072"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V072",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E193",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "E192",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "V072",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V073",
+      "vehicle_type": "premium",
+      "capacity": 2,
+      "avg_speed_kmph": 35.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V073_E035",
+        "E035_office",
+        "office_E120",
+        "E120_office",
+        "office_V073"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V073",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E035",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E120",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V073",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V074",
+      "vehicle_type": "premium",
+      "capacity": 6,
+      "avg_speed_kmph": 38.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V074_E033",
+        "E033_office",
+        "office_E112",
+        "E112_office",
+        "office_V074"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V074",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E033",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E112",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V074",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V075",
+      "vehicle_type": "premium",
+      "capacity": 2,
+      "avg_speed_kmph": 59.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V075_E187",
+        "E187_office",
+        "office_V075"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V075",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E187",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V075",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V076",
+      "vehicle_type": "premium",
+      "capacity": 4,
+      "avg_speed_kmph": 46.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V076_E090",
+        "E090_office",
+        "office_V076"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V076",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E090",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V076",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V077",
+      "vehicle_type": "any",
+      "capacity": 2,
+      "avg_speed_kmph": 45.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V077_E076",
+        "E076_office",
+        "office_V077"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V077",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E076",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V077",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V078",
+      "vehicle_type": "normal",
+      "capacity": 4,
+      "avg_speed_kmph": 36.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V078_E048",
+        "E048_E026",
+        "E026_office",
+        "office_V078"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V078",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E048",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "E026",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "V078",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V079",
+      "vehicle_type": "any",
+      "capacity": 4,
+      "avg_speed_kmph": 55.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V079_E060",
+        "E060_office",
+        "office_E204",
+        "E204_office",
+        "office_V079"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V079",
+          "arrival_time": "08:03",
+          "departure_time": "08:03"
+        },
+        {
+          "step": 1,
+          "location": "E060",
+          "arrival_time": "08:33",
+          "departure_time": "08:33"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:03",
+          "departure_time": "09:03"
+        },
+        {
+          "step": 3,
+          "location": "E204",
+          "arrival_time": "09:33",
+          "departure_time": "09:33"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:03",
+          "departure_time": "10:03"
+        },
+        {
+          "step": 5,
+          "location": "V079",
+          "arrival_time": "10:03",
+          "departure_time": "10:03"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V080",
+      "vehicle_type": "premium",
+      "capacity": 4,
+      "avg_speed_kmph": 30.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V080_E066",
+        "E066_office",
+        "office_E225",
+        "E225_office",
+        "office_V080"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V080",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E066",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E225",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V080",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V081",
+      "vehicle_type": "normal",
+      "capacity": 6,
+      "avg_speed_kmph": 58.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V081_E056",
+        "E056_office",
+        "office_E170",
+        "E170_office",
+        "office_V081"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V081",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E056",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E170",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V081",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V082",
+      "vehicle_type": "premium",
+      "capacity": 4,
+      "avg_speed_kmph": 38.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 90.0,
+      "total_steps": 5,
+      "routes": [
+        "V082_E176",
+        "E176_E160",
+        "E160_office",
+        "office_V082"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V082",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E176",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "E160",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "office",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "V082",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V083",
+      "vehicle_type": "normal",
+      "capacity": 2,
+      "avg_speed_kmph": 46.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V083_E208",
+        "E208_office",
+        "office_V083"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V083",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E208",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V083",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V084",
+      "vehicle_type": "any",
+      "capacity": 2,
+      "avg_speed_kmph": 57.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V084_E031",
+        "E031_office",
+        "office_E104",
+        "E104_office",
+        "office_V084"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V084",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E031",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E104",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V084",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V085",
+      "vehicle_type": "normal",
+      "capacity": 2,
+      "avg_speed_kmph": 46.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V085_E172",
+        "E172_office",
+        "office_V085"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V085",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E172",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V085",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V086",
+      "vehicle_type": "premium",
+      "capacity": 6,
+      "avg_speed_kmph": 51.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V086_E189",
+        "E189_office",
+        "office_V086"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V086",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E189",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V086",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V087",
+      "vehicle_type": "any",
+      "capacity": 4,
+      "avg_speed_kmph": 46.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V087_E079",
+        "E079_office",
+        "office_V087"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V087",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E079",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "V087",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V088",
+      "vehicle_type": "premium",
+      "capacity": 2,
+      "avg_speed_kmph": 56.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 120.0,
+      "total_steps": 6,
+      "routes": [
+        "V088_E069",
+        "E069_office",
+        "office_E235",
+        "E235_office",
+        "office_V088"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V088",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E069",
+          "arrival_time": "08:30",
+          "departure_time": "08:30"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:00",
+          "departure_time": "09:00"
+        },
+        {
+          "step": 3,
+          "location": "E235",
+          "arrival_time": "09:30",
+          "departure_time": "09:30"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        },
+        {
+          "step": 5,
+          "location": "V088",
+          "arrival_time": "10:00",
+          "departure_time": "10:00"
+        }
+      ]
+    },
+    {
+      "vehicle_id": "V089",
+      "vehicle_type": "premium",
+      "capacity": 2,
+      "avg_speed_kmph": 48.0,
+      "total_cost": 0.0,
+      "total_time_minutes": 60.0,
+      "total_steps": 4,
+      "routes": [
+        "V089_E209",
+        "E209_office",
+        "office_V089"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V089",
+          "arrival_time": "08:05",
+          "departure_time": "08:05"
+        },
+        {
+          "step": 1,
+          "location": "E209",
+          "arrival_time": "08:35",
+          "departure_time": "08:35"
+        },
+        {
+          "step": 2,
+          "location": "office",
+          "arrival_time": "09:05",
+          "departure_time": "09:05"
+        },
+        {
+          "step": 3,
+          "location": "V089",
+          "arrival_time": "09:05",
+          "departure_time": "09:05"
         }
       ]
     }
   ],
+  "unassigned": [
+    "E002",
+    "E011",
+    "E015",
+    "E017",
+    "E018",
+    "E020",
+    "E021",
+    "E023",
+    "E024",
+    "E028",
+    "E029",
+    "E030",
+    "E032",
+    "E036",
+    "E037",
+    "E039",
+    "E041",
+    "E045",
+    "E047",
+    "E049",
+    "E054",
+    "E057",
+    "E063",
+    "E064",
+    "E068",
+    "E071",
+    "E080",
+    "E081",
+    "E084",
+    "E091",
+    "E094",
+    "E095",
+    "E096",
+    "E100",
+    "E105",
+    "E107",
+    "E108",
+    "E111",
+    "E113",
+    "E114",
+    "E118",
+    "E124",
+    "E125",
+    "E127",
+    "E128",
+    "E129",
+    "E131",
+    "E132",
+    "E135",
+    "E137",
+    "E141",
+    "E142",
+    "E143",
+    "E144",
+    "E145",
+    "E146",
+    "E147",
+    "E150",
+    "E151",
+    "E153",
+    "E154",
+    "E158",
+    "E159",
+    "E162",
+    "E166",
+    "E167",
+    "E168",
+    "E169",
+    "E171",
+    "E173",
+    "E174",
+    "E175",
+    "E177",
+    "E179",
+    "E181",
+    "E196",
+    "E197",
+    "E198",
+    "E201",
+    "E203",
+    "E207",
+    "E216",
+    "E217",
+    "E218",
+    "E219",
+    "E220",
+    "E221",
+    "E222",
+    "E223",
+    "E224",
+    "E226",
+    "E227",
+    "E228",
+    "E229",
+    "E230",
+    "E231",
+    "E232",
+    "E233",
+    "E234",
+    "E236",
+    "E238",
+    "E240",
+    "E241",
+    "E242",
+    "E243",
+    "E244"
+  ],
   "summary": {
-    "total_cost_all_vehicles": 705.76
+    "total_cost_all_vehicles": 48896.29
   }
 }
