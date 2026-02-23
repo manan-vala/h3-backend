@@ -6,8 +6,8 @@ import random
 logger = logging.getLogger("celery_worker")
 
 # Configuration
-OSRM_TABLE_URL = "http://34.131.46.142:5000/table/v1/driving/"
-OSRM_ROUTE_URL = "http://34.131.46.142:5000/route/v1/driving/"
+OSRM_TABLE_URL = "http://34.131.59.11:5000/table/v1/driving/"
+OSRM_ROUTE_URL = "http://34.131.59.11:5000/route/v1/driving/"
 
 class MatrixService:
     """
