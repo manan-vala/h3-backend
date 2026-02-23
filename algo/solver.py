@@ -1,23 +1,75 @@
 from .lns_algo import LNSOptimizer
+from .vroom_solver import solve_vroom
+import json
+import importlib.util
+import sys
+import os
+from .feasibilityfinal import get_feasibility_score
+
+# Trick to import 16-02.py which is not a valid python module name
+def import_custom_module(module_name, file_path):
+    spec = importlib.util.spec_from_file_location(module_name, file_path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
 
 def solve_vrp(input_data, matrix_edge_list, file_bytes):
     """
-    Main Solver Function using LNS.
-    Args:
-        input_data (dict): The original payload (employees, vehicles, metadata).
-        matrix_edge_list (list): The flat list of edge costs from logic.py.
-        file_bytes (bytes): The raw Excel file bytes.
+    Main Solver Function that tries multiple algorithms and picks the best.
     """
-    # Initialize LNS Optimizer
-    # We can pass initial_sol as None for now, or try to build a simple one.
-    lns = LNSOptimizer(file_bytes, matrix_edge_list)
+    solutions = []
     
-    # Run optimization
-    # Adjust max_iterations based on performance needs. 
-    # For a request-response cycle, maybe 50-100 is enough.
-    lns.optimize(max_iterations=50)
+    # 1. LNS Solver
+    try:
+        lns = LNSOptimizer(file_bytes, matrix_edge_list)
+        lns.optimize(max_iterations=100)
+        solutions.append(("LNS", lns.get_formatted_output()))
+    except Exception as e:
+        print(f"LNS Solver failed: {e}")
+
+    # 2. ALNS Solver (from 16-02.py)
+    try:
+        curr_dir = os.path.dirname(__file__)
+        alns_mod = import_custom_module("alns_solver_16_02", os.path.join(curr_dir, "16-02.py"))
+        alns_res = alns_mod.solve_alns(input_data, matrix_edge_list, file_bytes)
+        solutions.append(("ALNS", alns_res))
+    except Exception as e:
+        print(f"ALNS Solver failed: {e}")
+
+    # 3. VROOM Solver
+    try:
+        vroom_res = solve_vroom(input_data, matrix_edge_list, file_bytes)
+        solutions.append(("VROOM", vroom_res))
+    except Exception as e:
+        print(f"VROOM Solver failed: {e}")
+
+    if not solutions:
+        raise Exception("All solvers failed")
+
+    # Evaluate and pick best
+    scored_solutions = []
+    for name, sol in solutions:
+        score = get_feasibility_score(file_bytes, matrix_edge_list, sol)
+        scored_solutions.append((name, sol, score))
+        print(f"Solver {name}: Served={score['served_count']}, HardViolations={score['hard_violations']}, Objective={score['objective']:.2f}, SoftViolations={score['soft_violations']}")
+
+    # Ranking criteria:
+    # 1. strictly 0 hard constraint violations
+    # 2. then compare the number of people serviced(higher is better) strictly
+    # 3. minimized objective cost and time(lower is better)
+    # 4. Number of soft constraints(lower is better)
     
-    # Get formatted result
-    result = lns.get_formatted_output()
+    # Filter valid solutions (hard_violations == 0)
+    valid_sols = [s for s in scored_solutions if s[2]['hard_violations'] == 0]
     
-    return result
+    if not valid_sols:
+        # If no valid solutions, pick the one with least hard violations
+        best_overall = min(scored_solutions, key=lambda x: (x[2]['hard_violations'], -x[2]['served_count'], x[2]['objective'], x[2]['soft_violations']))
+    else:
+        # Pick best from valid ones
+        best_overall = min(valid_sols, key=lambda x: (-x[2]['served_count'], x[2]['objective'], x[2]['soft_violations']))
+
+    print(f"Selected Best Solver: {best_overall[0]}")
+    return best_overall[1]
+

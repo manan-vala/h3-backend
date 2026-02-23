@@ -35,15 +35,19 @@ class DistanceMatrix:
         self.data = {item['id']: item for item in matrix_edge_list}
 
     def get_dist_dur(self, from_id: str, to_id: str):
-        # Handle "office" as a special case if needed, but matrix should have it
+        if from_id == to_id:
+            return 0.0, 0.0
+        
         key = f"{from_id}_{to_id}"
         if key in self.data:
             return self.data[key]['distance_meters'] / 1000.0, self.data[key]['duration_seconds'] / 60.0
         
-        # If not found, try reverse for some types? 
-        # Usually OSRM matrices are asymmetric, but let's be safe.
-        # However, the user provided matrix should be complete for the requested pairs.
-        return 10000.0, 1000.0 # Large default if missing
+        # Try reverse just in case, though OSRM is usually directed
+        rev_key = f"{to_id}_{from_id}"
+        if rev_key in self.data:
+            return self.data[rev_key]['distance_meters'] / 1000.0, self.data[rev_key]['duration_seconds'] / 60.0
+
+        return 10.0, 30.0 # More reasonable default than 10000
 
 def time_to_minutes(t):
     """Handle datetime.time, datetime.datetime, string, or float (fraction of day)"""
