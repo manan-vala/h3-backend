@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  # --- Message Broker & Result Backend ---
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # --- FastAPI Server ---
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+
+  # --- Celery Worker ---
+  worker:
+    build: .
+    command: celery -A worker.celery_app worker --loglevel=info --pool=solo
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379/0

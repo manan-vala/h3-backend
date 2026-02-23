@@ -41,11 +41,14 @@ async def enrich_with_geometries(schedule_data, input_payload):
 
     def parse_tag(tag):
         parts = tag.split('_')
-        # Logic to handle "office" or standard IDs
+        # IMPORTANT: This assumes IDs do NOT contain underscores.
+        # If IDs ever contain underscores (e.g. "EMP_001"), this will break.
         if len(parts) == 2: return parts[0], parts[1]
         if "office" in tag:
-            if tag.startswith("office_"): return "office", tag.replace("office_", "")
-            if tag.endswith("_office"): return tag.replace("_office", ""), "office"
+            if tag.startswith("office_"): return "office", tag.replace("office_", "", 1)
+            if tag.endswith("_office"): return tag.rsplit("_office", 1)[0], "office"
+        # Fallback: log a warning for ambiguous tags
+        print(f"Ambiguous route tag: '{tag}' — assuming first two parts")
         return parts[0], parts[1]
 
     for tag in unique_tags:

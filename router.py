@@ -1,6 +1,9 @@
 import httpx
 import asyncio
+import logging
 import random
+
+logger = logging.getLogger("celery_worker")
 
 # Configuration
 OSRM_TABLE_URL = "http://34.131.46.142:5000/table/v1/driving/"
@@ -41,12 +44,13 @@ class MatrixService:
                     data = resp.json()
                     self.durations = data['durations']
                     self.distances = data['distances']
+                    logger.info(f"[Matrix] Fetched {len(self.coords_list)}x{len(self.coords_list)} matrix successfully.")
                     return True
                 else:
-                    print(f"Matrix API Error: {resp.status_code}")
+                    logger.error(f"[Matrix] API Error: HTTP {resp.status_code} — {resp.text[:200]}")
                     return False
             except Exception as e:
-                print(f"Matrix Connection Error: {e}")
+                logger.error(f"[Matrix] Connection Error: {e}")
                 return False
 
     def get_pair(self, id_from, id_to):
@@ -95,21 +99,19 @@ class RouteService:
                             return tag, None # No route found (water?)
 
                     elif resp.status_code >= 500:
-                        # Server Error: Wait and Retry
-                        print(f"Server Error {tag} (Attempt {attempt+1}/{retries})")
+                        logger.warning(f"[Geometry] Server Error {tag} (Attempt {attempt+1}/{retries})")
                     else:
-                        # 4xx Error (Bad Request): Do not retry
-                        print(f"Bad Request {tag}: {resp.status_code}")
+                        logger.warning(f"[Geometry] Bad Request {tag}: {resp.status_code}")
                         return tag, None
 
-                except (httpx.ConnectError, httpx.ReadTimeout, httpx.PoolTimeout):
-                    print(f"Network Error {tag} (Attempt {attempt+1}/{retries})")
+                except (httpx.ConnectError, httpx.ReadTimeout, httpx.PoolTimeout) as e:
+                    logger.warning(f"[Geometry] Network Error {tag} (Attempt {attempt+1}/{retries}): {e}")
 
                 # If we failed, wait 1 second before retrying (Backoff)
                 if attempt < retries - 1:
                     await asyncio.sleep(1)
 
-        print(f"Failed to fetch {tag} after {retries} attempts.")
+        logger.error(f"[Geometry] Failed to fetch {tag} after {retries} attempts.")
         return tag, None
 
     async def close(self):
