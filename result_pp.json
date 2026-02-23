@@ -1,0 +1,142 @@
+{
+  "vehicles": [
+    {
+      "vehicle_id": "V01",
+      "vehicle_type": "normal",
+      "capacity": 6,
+      "avg_speed_kmph": 30.0,
+      "total_cost": 1485.67,
+      "total_time_minutes": 424.04,
+      "total_steps": 18,
+      "routes": [
+        "V01_E14",
+        "E14_E15",
+        "E15_E13",
+        "E13_office",
+        "office_E67",
+        "E67_E49",
+        "E49_E50",
+        "E50_E88",
+        "E88_E76",
+        "E76_E54",
+        "E54_office",
+        "office_E93",
+        "E93_E91",
+        "E91_E94",
+        "E94_E87",
+        "E87_E86",
+        "E86_office"
+      ],
+      "route_sequence": [
+        {
+          "step": 0,
+          "location": "V01",
+          "arrival_time": "08:00",
+          "departure_time": "08:00"
+        },
+        {
+          "step": 1,
+          "location": "E14",
+          "arrival_time": "08:05",
+          "departure_time": "08:05"
+        },
+        {
+          "step": 2,
+          "location": "E15",
+          "arrival_time": "08:16",
+          "departure_time": "08:16"
+        },
+        {
+          "step": 3,
+          "location": "E13",
+          "arrival_time": "08:25",
+          "departure_time": "08:25"
+        },
+        {
+          "step": 4,
+          "location": "office",
+          "arrival_time": "08:34"
+        },
+        {
+          "step": 5,
+          "location": "E67",
+          "arrival_time": "09:04",
+          "departure_time": "09:04"
+        },
+        {
+          "step": 6,
+          "location": "E49",
+          "arrival_time": "09:34",
+          "departure_time": "09:34"
+        },
+        {
+          "step": 7,
+          "location": "E50",
+          "arrival_time": "10:04",
+          "departure_time": "10:04"
+        },
+        {
+          "step": 8,
+          "location": "E88",
+          "arrival_time": "10:34",
+          "departure_time": "10:34"
+        },
+        {
+          "step": 9,
+          "location": "E76",
+          "arrival_time": "11:04",
+          "departure_time": "11:04"
+        },
+        {
+          "step": 10,
+          "location": "E54",
+          "arrival_time": "11:34",
+          "departure_time": "11:34"
+        },
+        {
+          "step": 11,
+          "location": "office",
+          "arrival_time": "12:04"
+        },
+        {
+          "step": 12,
+          "location": "E93",
+          "arrival_time": "12:34",
+          "departure_time": "12:34"
+        },
+        {
+          "step": 13,
+          "location": "E91",
+          "arrival_time": "13:04",
+          "departure_time": "13:04"
+        },
+        {
+          "step": 14,
+          "location": "E94",
+          "arrival_time": "13:34",
+          "departure_time": "13:34"
+        },
+        {
+          "step": 15,
+          "location": "E87",
+          "arrival_time": "14:04",
+          "departure_time": "14:04"
+        },
+        {
+          "step": 16,
+          "location": "E86",
+          "arrival_time": "14:34",
+          "departure_time": "14:34"
+        },
+        {
+          "step": 17,
+          "location": "office",
+          "arrival_time": "15:04"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_cost_all_vehicles": 1485.67
+  }
+}

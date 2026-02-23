@@ -10,6 +10,9 @@ from .feasibilityfinal import get_feasibility_score
 def import_custom_module(module_name, file_path):
     spec = importlib.util.spec_from_file_location(module_name, file_path)
     module = importlib.util.module_from_spec(spec)
+    # Tell Python this module lives inside the 'algo' package so that
+    # relative imports (e.g. `from .lns_utils import ...`) work correctly.
+    module.__package__ = __package__  # same package as solver.py ("algo")
     sys.modules[module_name] = module
     spec.loader.exec_module(module)
     return module
@@ -28,12 +31,18 @@ def solve_vrp(input_data, matrix_edge_list, file_bytes):
     except Exception as e:
         print(f"LNS Solver failed: {e}")
 
-    # 2. ALNS Solver (from 16-02.py)
+    # 2. ALNS Solver (from 16-02.py) – hard 30 s wall-clock timeout
     try:
+        import concurrent.futures
         curr_dir = os.path.dirname(__file__)
         alns_mod = import_custom_module("alns_solver_16_02", os.path.join(curr_dir, "16-02.py"))
-        alns_res = alns_mod.solve_alns(input_data, matrix_edge_list, file_bytes)
-        solutions.append(("ALNS", alns_res))
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            fut = pool.submit(alns_mod.solve_alns, input_data, matrix_edge_list, file_bytes)
+            try:
+                alns_res = fut.result(timeout=30)   # 30 s hard cap
+                solutions.append(("ALNS", alns_res))
+            except concurrent.futures.TimeoutError:
+                print("ALNS Solver timed out (>30 s), skipping.")
     except Exception as e:
         print(f"ALNS Solver failed: {e}")
 
