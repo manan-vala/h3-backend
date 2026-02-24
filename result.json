@@ -12,24 +12,24 @@
         "V01_E02",
         "E02_E04",
         "E04_office",
-        "office_E38",
-        "E38_E66",
-        "E66_E50",
-        "E50_office",
-        "office_E47",
-        "E47_E70",
-        "E70_E74",
-        "E74_office",
-        "office_E73",
-        "E73_E22",
-        "E22_office",
-        "office_E62",
-        "E62_E65",
-        "E65_E55",
-        "E55_office",
-        "office_E52",
-        "E52_E53",
-        "E53_office"
+        "office_E22",
+        "E22_E80",
+        "E80_E68",
+        "E68_office",
+        "office_E58",
+        "E58_E26",
+        "E26_E47",
+        "E47_office",
+        "office_E71",
+        "E71_E56",
+        "E56_E52",
+        "E52_office",
+        "office_E43",
+        "E43_E42",
+        "E42_E57",
+        "E57_office",
+        "office_E40",
+        "E40_office"
       ],
       "route_sequence": [
         {
@@ -57,19 +57,19 @@
         },
         {
           "step": 4,
-          "location": "E38",
+          "location": "E22",
           "arrival_time": "08:46",
           "departure_time": "08:46"
         },
         {
           "step": 5,
-          "location": "E66",
+          "location": "E80",
           "arrival_time": "09:16",
           "departure_time": "09:16"
         },
         {
           "step": 6,
-          "location": "E50",
+          "location": "E68",
           "arrival_time": "09:46",
           "departure_time": "09:46"
         },
@@ -80,19 +80,19 @@
         },
         {
           "step": 8,
-          "location": "E47",
+          "location": "E58",
           "arrival_time": "10:46",
           "departure_time": "10:46"
         },
         {
           "step": 9,
-          "location": "E70",
+          "location": "E26",
           "arrival_time": "11:16",
           "departure_time": "11:16"
         },
         {
           "step": 10,
-          "location": "E74",
+          "location": "E47",
           "arrival_time": "11:46",
           "departure_time": "11:46"
         },
@@ -103,53 +103,53 @@
         },
         {
           "step": 12,
-          "location": "E73",
+          "location": "E71",
           "arrival_time": "12:46",
           "departure_time": "12:46"
         },
         {
           "step": 13,
-          "location": "E22",
+          "location": "E56",
           "arrival_time": "13:16",
           "departure_time": "13:16"
         },
         {
           "step": 14,
-          "location": "office",
-          "arrival_time": "13:46"
+          "location": "E52",
+          "arrival_time": "13:46",
+          "departure_time": "13:46"
         },
         {
           "step": 15,
-          "location": "E62",
-          "arrival_time": "14:16",
-          "departure_time": "14:16"
+          "location": "office",
+          "arrival_time": "14:16"
         },
         {
           "step": 16,
-          "location": "E65",
+          "location": "E43",
           "arrival_time": "14:46",
           "departure_time": "14:46"
         },
         {
           "step": 17,
-          "location": "E55",
+          "location": "E42",
           "arrival_time": "15:16",
           "departure_time": "15:16"
         },
         {
           "step": 18,
-          "location": "office",
-          "arrival_time": "15:46"
+          "location": "E57",
+          "arrival_time": "15:46",
+          "departure_time": "15:46"
         },
         {
           "step": 19,
-          "location": "E52",
-          "arrival_time": "16:16",
-          "departure_time": "16:16"
+          "location": "office",
+          "arrival_time": "16:16"
         },
         {
           "step": 20,
-          "location": "E53",
+          "location": "E40",
           "arrival_time": "16:46",
           "departure_time": "16:46"
         },

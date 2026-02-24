@@ -33,8 +33,15 @@ class Vehicle:
 class DistanceMatrix:
     def __init__(self, matrix_edge_list):
         self.data = {item['id']: item for item in matrix_edge_list}
+        # Store location coordinates extracted from identifiable entries
+        # so we can compute haversine fallbacks when edges are missing.
+        self._loc_coords: dict = {}  # id -> (lat, lng)
 
-    def get_dist_dur(self, from_id: str, to_id: str):
+    def register_location(self, loc_id: str, lat: float, lng: float):
+        """Register a location's coordinates for haversine fallback."""
+        self._loc_coords[loc_id] = (lat, lng)
+
+    def get_dist_dur(self, from_id: str, to_id: str, speed_kmph: float = 30.0):
         if from_id == to_id:
             return 0.0, 0.0
         
@@ -47,7 +54,16 @@ class DistanceMatrix:
         if rev_key in self.data:
             return self.data[rev_key]['distance_meters'] / 1000.0, self.data[rev_key]['duration_seconds'] / 60.0
 
-        return 10.0, 30.0 # More reasonable default than 10000
+        # Haversine-based fallback (consistent with ALNS solver)
+        # Apply 1.3x road-factor: real roads are ~20-40% longer than straight-line
+        if from_id in self._loc_coords and to_id in self._loc_coords:
+            lat1, lng1 = self._loc_coords[from_id]
+            lat2, lng2 = self._loc_coords[to_id]
+            km = haversine(lat1, lng1, lat2, lng2) * 1.3
+            travel_min = (km / speed_kmph) * 60.0 if speed_kmph > 0 else 0.0
+            return km, travel_min
+
+        return 10.0, 30.0  # last resort default
 
 def time_to_minutes(t):
     """Handle datetime.time, datetime.datetime, string, or float (fraction of day)"""

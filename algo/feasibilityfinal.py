@@ -11,6 +11,13 @@ def get_feasibility_score(file_bytes, matrix_edge_list, solution_json):
     """
     employees_raw, vehicles_raw = load_data_from_bytes(file_bytes)
     dist_matrix = DistanceMatrix(matrix_edge_list)
+
+    # Register all known location coordinates for haversine fallback
+    for eid, emp in employees_raw.items():
+        dist_matrix.register_location(eid, emp.pickup_lat, emp.pickup_lng)
+        dist_matrix.register_location("office", emp.drop_lat, emp.drop_lng)
+    for vid, veh in vehicles_raw.items():
+        dist_matrix.register_location(vid, veh.start_lat, veh.start_lng)
     
     # We need metadata for weights and delays
     from io import BytesIO
@@ -53,7 +60,8 @@ def get_feasibility_score(file_bytes, matrix_edge_list, solution_json):
         for step in sequence[1:]: # Skip start
             target_loc = step['location']
             
-            dist_km, travel_time_min = dist_matrix.get_dist_dur(curr_loc, target_loc)
+            dist_km, travel_time_min = dist_matrix.get_dist_dur(
+                curr_loc, target_loc, speed_kmph=veh.speed)
             
             total_cost += dist_km * veh.cost_per_km
             arrival_time = curr_time + travel_time_min
@@ -65,9 +73,6 @@ def get_feasibility_score(file_bytes, matrix_edge_list, solution_json):
                     delay = max(0, arrival_time - emp.latest_drop)
                     max_allowed = delays.get(str(emp.priority), 0.0)
                     if delay > max_allowed:
-                        # Hard violation if we want to follow the "strictly 0" rule for everything
-                        # But user says "strictly 0 hard constraint violations"
-                        # Usually priority breach is hard.
                         hard_count += 1
                     elif delay > 0:
                         soft_count += 1

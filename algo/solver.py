@@ -31,18 +31,26 @@ def solve_vrp(input_data, matrix_edge_list, file_bytes):
     except Exception as e:
         print(f"LNS Solver failed: {e}")
 
-    # 2. ALNS Solver (from 16-02.py) – hard 30 s wall-clock timeout
+    # 2. ALNS Solver (from 16-02.py)
+    # result_ref is a shared 1-element list that ALNS updates live.
+    # Even on timeout, we recover the best partial result found so far.
     try:
         import concurrent.futures
         curr_dir = os.path.dirname(__file__)
         alns_mod = import_custom_module("alns_solver_16_02", os.path.join(curr_dir, "16-02.py"))
+        result_ref = [None]  # shared container written by ALNS thread
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
-            fut = pool.submit(alns_mod.solve_alns, input_data, matrix_edge_list, file_bytes)
+            fut = pool.submit(alns_mod.solve_alns,
+                              input_data, matrix_edge_list, file_bytes, result_ref)
             try:
-                alns_res = fut.result(timeout=30)   # 30 s hard cap
+                alns_res = fut.result(timeout=150)  # 150 s hard cap
                 solutions.append(("ALNS", alns_res))
             except concurrent.futures.TimeoutError:
-                print("ALNS Solver timed out (>30 s), skipping.")
+                if result_ref[0] is not None:
+                    print("ALNS Solver timed out – using best partial result found so far.")
+                    solutions.append(("ALNS", result_ref[0]))
+                else:
+                    print("ALNS Solver timed out with no partial result, skipping.")
     except Exception as e:
         print(f"ALNS Solver failed: {e}")
 

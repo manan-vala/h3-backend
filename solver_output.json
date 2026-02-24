@@ -2,19 +2,122 @@
   "vehicles": [
     {
       "vehicle_id": "V01",
-      "vehicle_type": "premium",
-      "capacity": 3,
-      "avg_speed_kmph": 28.0,
-      "total_cost": 132.92,
-      "total_time_minutes": 42.44,
-      "total_steps": 7,
+      "vehicle_type": "normal",
+      "capacity": 6,
+      "avg_speed_kmph": 30.0,
+      "total_cost": 2682.72,
+      "total_time_minutes": 524.96,
+      "total_steps": 110,
       "routes": [
-        "V01_E02",
-        "E02_E01",
-        "E01_E07",
+        "V01_E01",
+        "E01_E29",
+        "E29_E22",
+        "E22_E02",
+        "E02_E20",
+        "E20_E03",
+        "E03_office",
+        "office_E11",
+        "E11_E17",
+        "E17_E09",
+        "E09_E45",
+        "E45_E21",
+        "E21_E07",
         "E07_office",
-        "office_E13",
-        "E13_office"
+        "office_E14",
+        "E14_E46",
+        "E46_E63",
+        "E63_E47",
+        "E47_E16",
+        "E16_E13",
+        "E13_office",
+        "office_E18",
+        "E18_office",
+        "office_E28",
+        "E28_E27",
+        "E27_E26",
+        "E26_E25",
+        "E25_E23",
+        "E23_E19",
+        "E19_office",
+        "office_E24",
+        "E24_office",
+        "office_E30",
+        "E30_office",
+        "office_E38",
+        "E38_E35",
+        "E35_E33",
+        "E33_E32",
+        "E32_E31",
+        "E31_E34",
+        "E34_office",
+        "office_E36",
+        "E36_office",
+        "office_E44",
+        "E44_E43",
+        "E43_E41",
+        "E41_E40",
+        "E40_E39",
+        "E39_E37",
+        "E37_office",
+        "office_E60",
+        "E60_E42",
+        "E42_office",
+        "office_E48",
+        "E48_office",
+        "office_E53",
+        "E53_E52",
+        "E52_E51",
+        "E51_E50",
+        "E50_E49",
+        "E49_E56",
+        "E56_office",
+        "office_E54",
+        "E54_office",
+        "office_E62",
+        "E62_E58",
+        "E58_E57",
+        "E57_E55",
+        "E55_E59",
+        "E59_E61",
+        "E61_office",
+        "office_E66",
+        "E66_office",
+        "office_E74",
+        "E74_E71",
+        "E71_E70",
+        "E70_E68",
+        "E68_E67",
+        "E67_E69",
+        "E69_office",
+        "office_E72",
+        "E72_office",
+        "office_E80",
+        "E80_E79",
+        "E79_E77",
+        "E77_E76",
+        "E76_E75",
+        "E75_E73",
+        "E73_office",
+        "office_E78",
+        "E78_office",
+        "office_E84",
+        "E84_office",
+        "office_E92",
+        "E92_E89",
+        "E89_E87",
+        "E87_E86",
+        "E86_E85",
+        "E85_E88",
+        "E88_office",
+        "office_E90",
+        "E90_office",
+        "office_E94",
+        "E94_E93",
+        "E93_E91",
+        "E91_E95",
+        "E95_office",
+        "office_E96",
+        "E96_office"
       ],
       "route_sequence": [
         {
@@ -25,252 +128,661 @@
         },
         {
           "step": 1,
-          "location": "E02",
-          "arrival_time": "08:00",
-          "departure_time": "08:15"
+          "location": "E01",
+          "arrival_time": "08:02",
+          "departure_time": "08:02"
         },
         {
           "step": 2,
-          "location": "E01",
-          "arrival_time": "08:15",
-          "departure_time": "08:15"
+          "location": "E29",
+          "arrival_time": "08:02",
+          "departure_time": "08:02"
         },
         {
           "step": 3,
-          "location": "E07",
-          "arrival_time": "08:19",
-          "departure_time": "08:19"
+          "location": "E22",
+          "arrival_time": "08:02",
+          "departure_time": "08:02"
         },
         {
           "step": 4,
+          "location": "E02",
+          "arrival_time": "08:03",
+          "departure_time": "08:03"
+        },
+        {
+          "step": 5,
+          "location": "E20",
+          "arrival_time": "08:03",
+          "departure_time": "08:03"
+        },
+        {
+          "step": 6,
+          "location": "E03",
+          "arrival_time": "08:04",
+          "departure_time": "08:04"
+        },
+        {
+          "step": 7,
           "location": "office",
+          "arrival_time": "08:16",
+          "departure_time": "08:16"
+        },
+        {
+          "step": 8,
+          "location": "E11",
+          "arrival_time": "08:26",
+          "departure_time": "08:26"
+        },
+        {
+          "step": 9,
+          "location": "E17",
+          "arrival_time": "08:26",
+          "departure_time": "08:26"
+        },
+        {
+          "step": 10,
+          "location": "E09",
+          "arrival_time": "08:26",
+          "departure_time": "08:26"
+        },
+        {
+          "step": 11,
+          "location": "E45",
+          "arrival_time": "08:27",
+          "departure_time": "08:27"
+        },
+        {
+          "step": 12,
+          "location": "E21",
           "arrival_time": "08:28",
           "departure_time": "08:28"
         },
         {
-          "step": 5,
-          "location": "E13",
-          "arrival_time": "08:35",
-          "departure_time": "08:35"
+          "step": 13,
+          "location": "E07",
+          "arrival_time": "08:28",
+          "departure_time": "08:28"
         },
         {
-          "step": 6,
+          "step": 14,
           "location": "office",
-          "arrival_time": "08:42"
-        }
-      ]
-    },
-    {
-      "vehicle_id": "V02",
-      "vehicle_type": "premium",
-      "capacity": 3,
-      "avg_speed_kmph": 30.0,
-      "total_cost": 74.79,
-      "total_time_minutes": 56.43,
-      "total_steps": 5,
-      "routes": [
-        "V02_E04",
-        "E04_E15",
-        "E15_E06",
-        "E06_office"
-      ],
-      "route_sequence": [
-        {
-          "step": 0,
-          "location": "V02",
-          "arrival_time": "08:00",
-          "departure_time": "08:00"
+          "arrival_time": "08:42",
+          "departure_time": "08:42"
         },
         {
-          "step": 1,
-          "location": "E04",
-          "arrival_time": "08:01",
-          "departure_time": "08:45"
-        },
-        {
-          "step": 2,
-          "location": "E15",
-          "arrival_time": "08:47",
-          "departure_time": "08:47"
-        },
-        {
-          "step": 3,
-          "location": "E06",
-          "arrival_time": "08:47",
-          "departure_time": "08:47"
-        },
-        {
-          "step": 4,
-          "location": "office",
-          "arrival_time": "08:57"
-        }
-      ]
-    },
-    {
-      "vehicle_id": "V03",
-      "vehicle_type": "normal",
-      "capacity": 4,
-      "avg_speed_kmph": 35.0,
-      "total_cost": 97.41,
-      "total_time_minutes": 114.95,
-      "total_steps": 5,
-      "routes": [
-        "V03_E05",
-        "E05_E14",
-        "E14_E12",
-        "E12_office"
-      ],
-      "route_sequence": [
-        {
-          "step": 0,
-          "location": "V03",
-          "arrival_time": "08:00",
-          "departure_time": "08:00"
-        },
-        {
-          "step": 1,
-          "location": "E05",
-          "arrival_time": "08:00",
-          "departure_time": "09:15"
-        },
-        {
-          "step": 2,
+          "step": 15,
           "location": "E14",
-          "arrival_time": "09:15",
-          "departure_time": "09:45"
+          "arrival_time": "08:54",
+          "departure_time": "08:54"
         },
         {
-          "step": 3,
-          "location": "E12",
-          "arrival_time": "09:47",
-          "departure_time": "09:47"
+          "step": 16,
+          "location": "E46",
+          "arrival_time": "08:55",
+          "departure_time": "08:55"
         },
         {
-          "step": 4,
+          "step": 17,
+          "location": "E63",
+          "arrival_time": "08:55",
+          "departure_time": "08:55"
+        },
+        {
+          "step": 18,
+          "location": "E47",
+          "arrival_time": "08:56",
+          "departure_time": "08:56"
+        },
+        {
+          "step": 19,
+          "location": "E16",
+          "arrival_time": "08:56",
+          "departure_time": "08:56"
+        },
+        {
+          "step": 20,
+          "location": "E13",
+          "arrival_time": "08:57",
+          "departure_time": "08:57"
+        },
+        {
+          "step": 21,
           "location": "office",
-          "arrival_time": "09:55"
-        }
-      ]
-    },
-    {
-      "vehicle_id": "V04",
-      "vehicle_type": "normal",
-      "capacity": 6,
-      "avg_speed_kmph": 32.0,
-      "total_cost": 118.1,
-      "total_time_minutes": 127.88,
-      "total_steps": 3,
-      "routes": [
-        "V04_E09",
-        "E09_office"
-      ],
-      "route_sequence": [
-        {
-          "step": 0,
-          "location": "V04",
-          "arrival_time": "08:00",
-          "departure_time": "08:00"
+          "arrival_time": "09:05",
+          "departure_time": "09:05"
         },
         {
-          "step": 1,
-          "location": "E09",
-          "arrival_time": "08:01",
-          "departure_time": "10:00"
+          "step": 22,
+          "location": "E18",
+          "arrival_time": "09:08",
+          "departure_time": "09:08"
         },
         {
-          "step": 2,
+          "step": 23,
           "location": "office",
-          "arrival_time": "10:09"
-        }
-      ]
-    },
-    {
-      "vehicle_id": "V05",
-      "vehicle_type": "normal",
-      "capacity": 1,
-      "avg_speed_kmph": 42.0,
-      "total_cost": 123.09,
-      "total_time_minutes": 111.98,
-      "total_steps": 5,
-      "routes": [
-        "V05_E10",
-        "E10_office",
-        "office_E11",
-        "E11_office"
-      ],
-      "route_sequence": [
-        {
-          "step": 0,
-          "location": "V05",
-          "arrival_time": "08:00",
-          "departure_time": "08:00"
+          "arrival_time": "09:11",
+          "departure_time": "09:11"
         },
         {
-          "step": 1,
-          "location": "E10",
-          "arrival_time": "08:00",
-          "departure_time": "09:30"
+          "step": 24,
+          "location": "E28",
+          "arrival_time": "09:34",
+          "departure_time": "09:34"
         },
         {
-          "step": 2,
+          "step": 25,
+          "location": "E27",
+          "arrival_time": "09:34",
+          "departure_time": "09:34"
+        },
+        {
+          "step": 26,
+          "location": "E26",
+          "arrival_time": "09:34",
+          "departure_time": "09:34"
+        },
+        {
+          "step": 27,
+          "location": "E25",
+          "arrival_time": "09:34",
+          "departure_time": "09:34"
+        },
+        {
+          "step": 28,
+          "location": "E23",
+          "arrival_time": "09:34",
+          "departure_time": "09:34"
+        },
+        {
+          "step": 29,
+          "location": "E19",
+          "arrival_time": "09:34",
+          "departure_time": "09:34"
+        },
+        {
+          "step": 30,
           "location": "office",
-          "arrival_time": "09:37",
-          "departure_time": "09:37"
+          "arrival_time": "09:56",
+          "departure_time": "09:56"
         },
         {
-          "step": 3,
-          "location": "E11",
-          "arrival_time": "09:44",
-          "departure_time": "09:44"
+          "step": 31,
+          "location": "E24",
+          "arrival_time": "09:59",
+          "departure_time": "09:59"
         },
         {
-          "step": 4,
+          "step": 32,
           "location": "office",
-          "arrival_time": "09:51"
-        }
-      ]
-    },
-    {
-      "vehicle_id": "V06",
-      "vehicle_type": "normal",
-      "capacity": 4,
-      "avg_speed_kmph": 34.0,
-      "total_cost": 159.44,
-      "total_time_minutes": 57.12,
-      "total_steps": 4,
-      "routes": [
-        "V06_E08",
-        "E08_E03",
-        "E03_office"
-      ],
-      "route_sequence": [
-        {
-          "step": 0,
-          "location": "V06",
-          "arrival_time": "08:09",
-          "departure_time": "08:09"
+          "arrival_time": "10:02",
+          "departure_time": "10:02"
         },
         {
-          "step": 1,
-          "location": "E08",
-          "arrival_time": "08:16",
-          "departure_time": "09:00"
+          "step": 33,
+          "location": "E30",
+          "arrival_time": "10:05",
+          "departure_time": "10:05"
         },
         {
-          "step": 2,
-          "location": "E03",
-          "arrival_time": "09:04",
-          "departure_time": "09:04"
-        },
-        {
-          "step": 3,
+          "step": 34,
           "location": "office",
-          "arrival_time": "09:13"
+          "arrival_time": "10:08",
+          "departure_time": "10:08"
+        },
+        {
+          "step": 35,
+          "location": "E38",
+          "arrival_time": "10:30",
+          "departure_time": "10:30"
+        },
+        {
+          "step": 36,
+          "location": "E35",
+          "arrival_time": "10:30",
+          "departure_time": "10:30"
+        },
+        {
+          "step": 37,
+          "location": "E33",
+          "arrival_time": "10:30",
+          "departure_time": "10:30"
+        },
+        {
+          "step": 38,
+          "location": "E32",
+          "arrival_time": "10:30",
+          "departure_time": "10:30"
+        },
+        {
+          "step": 39,
+          "location": "E31",
+          "arrival_time": "10:30",
+          "departure_time": "10:30"
+        },
+        {
+          "step": 40,
+          "location": "E34",
+          "arrival_time": "10:30",
+          "departure_time": "10:30"
+        },
+        {
+          "step": 41,
+          "location": "office",
+          "arrival_time": "10:52",
+          "departure_time": "10:52"
+        },
+        {
+          "step": 42,
+          "location": "E36",
+          "arrival_time": "10:55",
+          "departure_time": "10:55"
+        },
+        {
+          "step": 43,
+          "location": "office",
+          "arrival_time": "10:58",
+          "departure_time": "10:58"
+        },
+        {
+          "step": 44,
+          "location": "E44",
+          "arrival_time": "11:20",
+          "departure_time": "11:20"
+        },
+        {
+          "step": 45,
+          "location": "E43",
+          "arrival_time": "11:20",
+          "departure_time": "11:20"
+        },
+        {
+          "step": 46,
+          "location": "E41",
+          "arrival_time": "11:20",
+          "departure_time": "11:20"
+        },
+        {
+          "step": 47,
+          "location": "E40",
+          "arrival_time": "11:20",
+          "departure_time": "11:20"
+        },
+        {
+          "step": 48,
+          "location": "E39",
+          "arrival_time": "11:20",
+          "departure_time": "11:20"
+        },
+        {
+          "step": 49,
+          "location": "E37",
+          "arrival_time": "11:20",
+          "departure_time": "11:20"
+        },
+        {
+          "step": 50,
+          "location": "office",
+          "arrival_time": "11:42",
+          "departure_time": "11:42"
+        },
+        {
+          "step": 51,
+          "location": "E60",
+          "arrival_time": "11:45",
+          "departure_time": "11:45"
+        },
+        {
+          "step": 52,
+          "location": "E42",
+          "arrival_time": "11:45",
+          "departure_time": "11:45"
+        },
+        {
+          "step": 53,
+          "location": "office",
+          "arrival_time": "11:48",
+          "departure_time": "11:48"
+        },
+        {
+          "step": 54,
+          "location": "E48",
+          "arrival_time": "11:51",
+          "departure_time": "11:51"
+        },
+        {
+          "step": 55,
+          "location": "office",
+          "arrival_time": "11:53",
+          "departure_time": "11:53"
+        },
+        {
+          "step": 56,
+          "location": "E53",
+          "arrival_time": "12:15",
+          "departure_time": "12:15"
+        },
+        {
+          "step": 57,
+          "location": "E52",
+          "arrival_time": "12:15",
+          "departure_time": "12:15"
+        },
+        {
+          "step": 58,
+          "location": "E51",
+          "arrival_time": "12:15",
+          "departure_time": "12:15"
+        },
+        {
+          "step": 59,
+          "location": "E50",
+          "arrival_time": "12:15",
+          "departure_time": "12:15"
+        },
+        {
+          "step": 60,
+          "location": "E49",
+          "arrival_time": "12:15",
+          "departure_time": "12:15"
+        },
+        {
+          "step": 61,
+          "location": "E56",
+          "arrival_time": "12:15",
+          "departure_time": "12:15"
+        },
+        {
+          "step": 62,
+          "location": "office",
+          "arrival_time": "12:37",
+          "departure_time": "12:37"
+        },
+        {
+          "step": 63,
+          "location": "E54",
+          "arrival_time": "12:40",
+          "departure_time": "12:40"
+        },
+        {
+          "step": 64,
+          "location": "office",
+          "arrival_time": "12:42",
+          "departure_time": "12:42"
+        },
+        {
+          "step": 65,
+          "location": "E62",
+          "arrival_time": "13:04",
+          "departure_time": "13:04"
+        },
+        {
+          "step": 66,
+          "location": "E58",
+          "arrival_time": "13:04",
+          "departure_time": "13:04"
+        },
+        {
+          "step": 67,
+          "location": "E57",
+          "arrival_time": "13:04",
+          "departure_time": "13:04"
+        },
+        {
+          "step": 68,
+          "location": "E55",
+          "arrival_time": "13:04",
+          "departure_time": "13:04"
+        },
+        {
+          "step": 69,
+          "location": "E59",
+          "arrival_time": "13:04",
+          "departure_time": "13:04"
+        },
+        {
+          "step": 70,
+          "location": "E61",
+          "arrival_time": "13:04",
+          "departure_time": "13:04"
+        },
+        {
+          "step": 71,
+          "location": "office",
+          "arrival_time": "13:26",
+          "departure_time": "13:26"
+        },
+        {
+          "step": 72,
+          "location": "E66",
+          "arrival_time": "13:29",
+          "departure_time": "13:29"
+        },
+        {
+          "step": 73,
+          "location": "office",
+          "arrival_time": "13:31",
+          "departure_time": "13:31"
+        },
+        {
+          "step": 74,
+          "location": "E74",
+          "arrival_time": "13:53",
+          "departure_time": "13:53"
+        },
+        {
+          "step": 75,
+          "location": "E71",
+          "arrival_time": "13:53",
+          "departure_time": "13:53"
+        },
+        {
+          "step": 76,
+          "location": "E70",
+          "arrival_time": "13:53",
+          "departure_time": "13:53"
+        },
+        {
+          "step": 77,
+          "location": "E68",
+          "arrival_time": "13:53",
+          "departure_time": "13:53"
+        },
+        {
+          "step": 78,
+          "location": "E67",
+          "arrival_time": "13:53",
+          "departure_time": "13:53"
+        },
+        {
+          "step": 79,
+          "location": "E69",
+          "arrival_time": "13:53",
+          "departure_time": "13:53"
+        },
+        {
+          "step": 80,
+          "location": "office",
+          "arrival_time": "14:14",
+          "departure_time": "14:14"
+        },
+        {
+          "step": 81,
+          "location": "E72",
+          "arrival_time": "14:17",
+          "departure_time": "14:17"
+        },
+        {
+          "step": 82,
+          "location": "office",
+          "arrival_time": "14:20",
+          "departure_time": "14:20"
+        },
+        {
+          "step": 83,
+          "location": "E80",
+          "arrival_time": "14:41",
+          "departure_time": "14:41"
+        },
+        {
+          "step": 84,
+          "location": "E79",
+          "arrival_time": "14:41",
+          "departure_time": "14:41"
+        },
+        {
+          "step": 85,
+          "location": "E77",
+          "arrival_time": "14:41",
+          "departure_time": "14:41"
+        },
+        {
+          "step": 86,
+          "location": "E76",
+          "arrival_time": "14:41",
+          "departure_time": "14:41"
+        },
+        {
+          "step": 87,
+          "location": "E75",
+          "arrival_time": "14:41",
+          "departure_time": "14:41"
+        },
+        {
+          "step": 88,
+          "location": "E73",
+          "arrival_time": "14:41",
+          "departure_time": "14:41"
+        },
+        {
+          "step": 89,
+          "location": "office",
+          "arrival_time": "15:02",
+          "departure_time": "15:02"
+        },
+        {
+          "step": 90,
+          "location": "E78",
+          "arrival_time": "15:05",
+          "departure_time": "15:05"
+        },
+        {
+          "step": 91,
+          "location": "office",
+          "arrival_time": "15:07",
+          "departure_time": "15:07"
+        },
+        {
+          "step": 92,
+          "location": "E84",
+          "arrival_time": "15:10",
+          "departure_time": "15:10"
+        },
+        {
+          "step": 93,
+          "location": "office",
+          "arrival_time": "15:12",
+          "departure_time": "15:12"
+        },
+        {
+          "step": 94,
+          "location": "E92",
+          "arrival_time": "15:33",
+          "departure_time": "15:33"
+        },
+        {
+          "step": 95,
+          "location": "E89",
+          "arrival_time": "15:33",
+          "departure_time": "15:33"
+        },
+        {
+          "step": 96,
+          "location": "E87",
+          "arrival_time": "15:34",
+          "departure_time": "15:34"
+        },
+        {
+          "step": 97,
+          "location": "E86",
+          "arrival_time": "15:34",
+          "departure_time": "15:34"
+        },
+        {
+          "step": 98,
+          "location": "E85",
+          "arrival_time": "15:34",
+          "departure_time": "15:34"
+        },
+        {
+          "step": 99,
+          "location": "E88",
+          "arrival_time": "15:34",
+          "departure_time": "15:34"
+        },
+        {
+          "step": 100,
+          "location": "office",
+          "arrival_time": "15:55",
+          "departure_time": "15:55"
+        },
+        {
+          "step": 101,
+          "location": "E90",
+          "arrival_time": "15:57",
+          "departure_time": "15:57"
+        },
+        {
+          "step": 102,
+          "location": "office",
+          "arrival_time": "16:00",
+          "departure_time": "16:00"
+        },
+        {
+          "step": 103,
+          "location": "E94",
+          "arrival_time": "16:21",
+          "departure_time": "16:21"
+        },
+        {
+          "step": 104,
+          "location": "E93",
+          "arrival_time": "16:21",
+          "departure_time": "16:21"
+        },
+        {
+          "step": 105,
+          "location": "E91",
+          "arrival_time": "16:21",
+          "departure_time": "16:21"
+        },
+        {
+          "step": 106,
+          "location": "E95",
+          "arrival_time": "16:21",
+          "departure_time": "16:21"
+        },
+        {
+          "step": 107,
+          "location": "office",
+          "arrival_time": "16:42",
+          "departure_time": "16:42"
+        },
+        {
+          "step": 108,
+          "location": "E96",
+          "arrival_time": "16:44",
+          "departure_time": "16:44"
+        },
+        {
+          "step": 109,
+          "location": "office",
+          "arrival_time": "16:47"
         }
       ]
     }
   ],
   "summary": {
-    "total_cost_all_vehicles": 705.76
+    "total_cost_all_vehicles": 2682.72
   }
 }
