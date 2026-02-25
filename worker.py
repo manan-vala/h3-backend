@@ -111,3 +111,39 @@ def process_optimization_task(self, payload_dict: dict, file_path: str):
         if os.path.exists(file_path):
             os.remove(file_path)
             logger.info(f"Cleaned up temp file: {file_path}")
+
+@celery_app.task
+def cleanup_orphaned_files():
+    """
+    Background periodic task to delete files in temp_uploads older than 24 hours.
+    Requires Celery Beat to be running to trigger periodically.
+    """
+    try:
+        cutoff = time.time() - (24 * 3600)  # 24 hours ago
+        temp_dir = "temp_uploads"
+        if not os.path.exists(temp_dir):
+            return "temp_uploads does not exist"
+            
+        deleted_count = 0
+        for filename in os.listdir(temp_dir):
+            path = os.path.join(temp_dir, filename)
+            if os.path.isfile(path) and os.path.getmtime(path) < cutoff:
+                try:
+                    os.remove(path)
+                    logger.info(f"Deleted old orphaned file: {path}")
+                    deleted_count += 1
+                except Exception as e:
+                    logger.error(f"Error deleting old file {path}: {e}")
+                    
+        return f"Cleaned up {deleted_count} old files."
+    except Exception as e:
+        logger.error(f"Error in cleanup task: {e}")
+        raise e
+
+# Setup Celery Beat schedule for native task scheduling
+celery_app.conf.beat_schedule = {
+    'cleanup-temp-files-every-12-hours': {
+        'task': 'worker.cleanup_orphaned_files',
+        'schedule': 43200.0,  # Run every 12 hours (in seconds)
+    },
+}
