@@ -64,38 +64,38 @@ async def enrich_with_geometries(schedule_data, input_payload):
     results_list = await asyncio.gather(*tasks)
     await router.close()
 
-    # --- Step 4: Compress & Store ---
-    geometry_map = {}
-    for tag, coords in results_list:
-        if coords:
-            # OSRM = [lon, lat] -> Polyline = [lat, lon]
-            swapped_coords = [(p[1], p[0]) for p in coords]
-            geometry_map[tag] = polyline.encode(swapped_coords)
-        else:
-            geometry_map[tag] = ""
-
-    #     # --- Step 4: Compress & Store ---
+    # # --- Step 4: Compress & Store (Old) ---
     # geometry_map = {}
     # for tag, coords in results_list:
     #     if coords:
-    #         # 1. OSRM = [lon, lat] -> Polyline = [lat, lon]
+    #         # OSRM = [lon, lat] -> Polyline = [lat, lon]
     #         swapped_coords = [(p[1], p[0]) for p in coords]
-            
-    #         # 2. Look up exact coordinates to fix the Snapping Gap
-    #         src_id, dst_id = parse_tag(tag)
-    #         src = coord_map.get(src_id)
-    #         dst = coord_map.get(dst_id)
-            
-    #         # 3. Inject exact points to visually bridge the route to the markers
-    #         if src:
-    #             swapped_coords.insert(0, src)
-    #         if dst:
-    #             swapped_coords.append(dst)
-                
-    #         # 4. Encode the complete path
     #         geometry_map[tag] = polyline.encode(swapped_coords)
     #     else:
     #         geometry_map[tag] = ""
+
+    # --- Step 4: Compress & Store (New) ---
+    geometry_map = {}
+    for tag, coords in results_list:
+        if coords:
+            # 1. OSRM = [lon, lat] -> Polyline = [lat, lon]
+            swapped_coords = [(p[1], p[0]) for p in coords]
+            
+            # 2. Look up exact coordinates to fix the Snapping Gap
+            src_id, dst_id = parse_tag(tag)
+            src = coord_map.get(src_id)
+            dst = coord_map.get(dst_id)
+            
+            # 3. Inject exact points to visually bridge the route to the markers
+            if src:
+                swapped_coords.insert(0, src)
+            if dst:
+                swapped_coords.append(dst)
+                
+            # 4. Encode the complete path
+            geometry_map[tag] = polyline.encode(swapped_coords)
+        else:
+            geometry_map[tag] = ""
 
     # --- Step 5: Inject into Final JSON ---
     for v_data in vehicles_list:
