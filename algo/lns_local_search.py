@@ -34,71 +34,86 @@ class LocalSearch:
         
         # Caches
         self._score_cache = {}
-        self._feasibility_cache = {} 
+        self.MAX_CACHE_SIZE = 500000
+
+    def manage_cache_size(self):
+        if len(self._score_cache) > self.MAX_CACHE_SIZE:
+            self._score_cache.clear()
 
     def clear_cache(self):
-        self._score_cache.clear()
-        self._feasibility_cache.clear()
+        self.manage_cache_size()
 
     def get_cache_key(self, veh_id: str, groups: List[List[str]]) -> str:
         return veh_id + ':' + '|'.join(','.join(g) for g in groups)
 
+    def get_vehicle_score(self, veh_id: str, groups: List[List[str]]) -> Tuple[bool, int, float]:
+        if not groups:
+            return True, 0, 0.0
+
+        cache_key = self.get_cache_key(veh_id, groups)
+        if cache_key in self._score_cache:
+            return self._score_cache[cache_key]
+
+        feasible, metrics = self.simulator.simulate_vehicle(veh_id, groups)
+        if not feasible:
+            res = (False, 0, float('inf'))
+            self._score_cache[cache_key] = res
+            return res
+
+        served = sum(len(g) for g in groups)
+        score = (self.w_cost * metrics['total_cost'] +
+                 self.w_time * metrics['total_time'] +
+                 self.w_sharing * metrics['sharing_penalty'] +
+                 self.w_vehicle * metrics['vehicle_penalty'] +
+                 metrics['violation_penalty'])
+
+        res = (True, served, score)
+        self._score_cache[cache_key] = res
+        return res
+
     def calculate_objective(self, routes: Dict[str, List[List[str]]]) -> Tuple[int, float]:
         """Return (served_count, weighted_score)"""
-        total_cost = 0.0
-        total_time = 0.0
-        total_sharing_pen = 0.0
-        total_veh_pen = 0.0
-        total_violation_pen = 0.0
-        served_count = 0
-        
+        total_served = 0
+        total_score = 0.0
+
         for veh_id, groups in routes.items():
-            if not groups:
-                continue
-            
-            cache_key = self.get_cache_key(veh_id, groups)
-            if cache_key in self._score_cache:
-                cached = self._score_cache[cache_key]
-                served_count += cached['served']
-                total_cost += cached['cost']
-                total_time += cached['time']
-                total_sharing_pen += cached['sharing']
-                total_veh_pen += cached['veh']
-                total_violation_pen += cached['violation']
-                continue
-            
-            feasible, metrics = self.simulator.simulate_vehicle(veh_id, groups)
-            
+            feasible, served, score = self.get_vehicle_score(veh_id, groups)
             if not feasible:
                 return -1, float('inf')
-            
-            served = sum(len(g) for g in groups)
-            served_count += served
-            total_cost += metrics['total_cost']
-            total_time += metrics['total_time']
-            total_sharing_pen += metrics['sharing_penalty']
-            total_veh_pen += metrics['vehicle_penalty']
-            total_violation_pen += metrics['violation_penalty']
-            
-            self._score_cache[cache_key] = {
-                'served': served,
-                'cost': metrics['total_cost'],
-                'time': metrics['total_time'],
-                'sharing': metrics['sharing_penalty'],
-                'veh': metrics['vehicle_penalty'],
-                'violation': metrics['violation_penalty']
-            }
-        
-        score = (self.w_cost * total_cost + 
-                self.w_time * total_time + 
-                self.w_sharing * total_sharing_pen + 
-                self.w_vehicle * total_veh_pen +
-                total_violation_pen)
-        
-        return served_count, score
+            total_served += served
+            total_score += score
+
+        return total_served, total_score
+
+    def evaluate_move_delta(self, old_routes: Dict, new_routes: Dict, changed_vehs: List[str]) -> Tuple[bool, int, float]:
+        """Return (feasible, delta_served, delta_score)"""
+        delta_served = 0
+        delta_score = 0.0
+
+        for veh_id in set(changed_vehs):
+            old_groups = old_routes.get(veh_id, [])
+            _, old_served, old_score = self.get_vehicle_score(veh_id, old_groups)
+
+            new_groups = new_routes.get(veh_id, [])
+            feasible, new_served, new_score = self.get_vehicle_score(veh_id, new_groups)
+
+            if not feasible:
+                return False, 0, float('inf')
+
+            delta_served += (new_served - old_served)
+            delta_score += (new_score - old_score)
+
+        return True, delta_served, delta_score
 
     def copy_routes(self, routes: Dict) -> Dict:
         return {k: [list(g) for g in v] for k, v in routes.items()}
+
+    def _copy_for_mutate(self, routes: Dict, changed_vehs: List[str]) -> Dict:
+        new_routes = dict(routes)
+        for v in set(changed_vehs):
+            if v in new_routes:
+                new_routes[v] = [list(g) for g in new_routes[v]]
+        return new_routes
 
     def rebuild_location_map(self, routes: Dict) -> Dict:
         emp_loc = {}
@@ -112,8 +127,11 @@ class LocalSearch:
     # MOVES
     # ============================================================================
     
-    def apply_insert(self, routes, emp_location, unassigned, emp_id, veh_id, group_idx, pos):
-        new_routes = self.copy_routes(routes)
+    def apply_insert(self, routes, emp_location, unassigned, emp_id, veh_id, group_idx, pos, rebuild_map=True):
+        changed_vehs = [veh_id]
+        if emp_id in emp_location:
+            changed_vehs.append(emp_location[emp_id][0])
+        new_routes = self._copy_for_mutate(routes, changed_vehs)
         new_unassigned = set(unassigned)
         
         if emp_id in emp_location:
@@ -135,14 +153,13 @@ class LocalSearch:
             actual_pos = min(pos, len(veh_groups[group_idx]))
             veh_groups[group_idx].insert(actual_pos, emp_id)
             
-        new_emp_loc = self.rebuild_location_map(new_routes)
+        new_emp_loc = self.rebuild_location_map(new_routes) if rebuild_map else {}
         if emp_id in new_unassigned:
             new_unassigned.remove(emp_id)
             
         return new_routes, new_emp_loc, new_unassigned
 
-    def apply_swap(self, routes, emp_location, unassigned, emp_i, emp_j):
-        new_routes = self.copy_routes(routes)
+    def apply_swap(self, routes, emp_location, unassigned, emp_i, emp_j, rebuild_map=True):
         new_unassigned = set(unassigned)
         
         loc_i = emp_location.get(emp_i)
@@ -153,6 +170,8 @@ class LocalSearch:
         veh_i, g_i, p_i = loc_i
         veh_j, g_j, p_j = loc_j
         
+        new_routes = self._copy_for_mutate(routes, [veh_i, veh_j])
+        
         if veh_i == veh_j and g_i == g_j:
             new_routes[veh_i][g_i][p_i] = emp_j
             new_routes[veh_i][g_i][p_j] = emp_i
@@ -160,10 +179,10 @@ class LocalSearch:
             new_routes[veh_i][g_i][p_i] = emp_j
             new_routes[veh_j][g_j][p_j] = emp_i
             
-        new_emp_loc = self.rebuild_location_map(new_routes)
+        new_emp_loc = self.rebuild_location_map(new_routes) if rebuild_map else {}
         return new_routes, new_emp_loc, new_unassigned
 
-    def apply_2opt(self, routes, emp_location, unassigned, veh_id, group_idx, i, j):
+    def apply_2opt(self, routes, emp_location, unassigned, veh_id, group_idx, i, j, rebuild_map=True):
         if veh_id not in routes or group_idx >= len(routes[veh_id]):
             return None, None, None
         
@@ -171,16 +190,16 @@ class LocalSearch:
         if i >= j or i < 0 or j >= len(group):
             return None, None, None
             
-        new_routes = self.copy_routes(routes)
+        new_routes = self._copy_for_mutate(routes, [veh_id])
         new_routes[veh_id][group_idx] = group[:i] + group[i:j+1][::-1] + group[j+1:]
         
-        new_emp_loc = self.rebuild_location_map(new_routes)
+        new_emp_loc = self.rebuild_location_map(new_routes) if rebuild_map else {}
         return new_routes, new_emp_loc, set(unassigned)
 
-    def apply_relocate(self, routes, emp_location, unassigned, emp_id, target_veh, target_g, target_p):
-        return self.apply_insert(routes, emp_location, unassigned, emp_id, target_veh, target_g, target_p)
+    def apply_relocate(self, routes, emp_location, unassigned, emp_id, target_veh, target_g, target_p, rebuild_map=True):
+        return self.apply_insert(routes, emp_location, unassigned, emp_id, target_veh, target_g, target_p, rebuild_map=rebuild_map)
 
-    def apply_oropt(self, routes, emp_location, unassigned, veh_id, group_idx, start, end, insert_pos):
+    def apply_oropt(self, routes, emp_location, unassigned, veh_id, group_idx, start, end, insert_pos, rebuild_map=True):
         if veh_id not in routes or group_idx >= len(routes[veh_id]):
             return None, None, None
         
@@ -194,7 +213,7 @@ class LocalSearch:
         if start <= insert_pos < end:
             return None, None, None
             
-        new_routes = self.copy_routes(routes)
+        new_routes = self._copy_for_mutate(routes, [veh_id])
         segment = group[start:end]
         remaining = group[:start] + group[end:]
         
@@ -208,14 +227,14 @@ class LocalSearch:
         new_group = remaining[:insert_pos] + segment + remaining[insert_pos:]
         new_routes[veh_id][group_idx] = new_group
         
-        new_emp_loc = self.rebuild_location_map(new_routes)
+        new_emp_loc = self.rebuild_location_map(new_routes) if rebuild_map else {}
         return new_routes, new_emp_loc, set(unassigned)
 
-    def apply_exchange_groups(self, routes, emp_location, unassigned, veh_a, g_a, veh_b, g_b):
+    def apply_exchange_groups(self, routes, emp_location, unassigned, veh_a, g_a, veh_b, g_b, rebuild_map=True):
         if veh_a not in routes or veh_b not in routes: return None, None, None
         if g_a >= len(routes[veh_a]) or g_b >= len(routes[veh_b]): return None, None, None
         
-        new_routes = self.copy_routes(routes)
+        new_routes = self._copy_for_mutate(routes, [veh_a, veh_b])
         
         group_a = new_routes[veh_a][g_a]
         group_b = new_routes[veh_b][g_b]
@@ -223,15 +242,15 @@ class LocalSearch:
         new_routes[veh_a][g_a] = group_b
         new_routes[veh_b][g_b] = group_a
         
-        new_emp_loc = self.rebuild_location_map(new_routes)
+        new_emp_loc = self.rebuild_location_map(new_routes) if rebuild_map else {}
         return new_routes, new_emp_loc, set(unassigned)
 
-    def apply_merge_groups(self, routes, emp_location, unassigned, veh_id, g_i, g_j):
+    def apply_merge_groups(self, routes, emp_location, unassigned, veh_id, g_i, g_j, rebuild_map=True):
         if veh_id not in routes: return None, None, None
         groups = routes[veh_id]
         if g_i >= len(groups) or g_j >= len(groups) or g_i == g_j: return None, None, None
         
-        new_routes = self.copy_routes(routes)
+        new_routes = self._copy_for_mutate(routes, [veh_id])
         # Merge j into i
         merged = new_routes[veh_id][g_i] + new_routes[veh_id][g_j]
         new_routes[veh_id][g_i] = merged
@@ -246,22 +265,22 @@ class LocalSearch:
         new_routes[veh_id][low] = merged
         new_routes[veh_id].pop(high)
         
-        new_emp_loc = self.rebuild_location_map(new_routes)
+        new_emp_loc = self.rebuild_location_map(new_routes) if rebuild_map else {}
         return new_routes, new_emp_loc, set(unassigned)
 
-    def apply_split_group(self, routes, emp_location, unassigned, veh_id, g_idx, split_pos):
+    def apply_split_group(self, routes, emp_location, unassigned, veh_id, g_idx, split_pos, rebuild_map=True):
         if veh_id not in routes or g_idx >= len(routes[veh_id]): return None, None, None
         group = routes[veh_id][g_idx]
         if split_pos <= 0 or split_pos >= len(group): return None, None, None
         
-        new_routes = self.copy_routes(routes)
+        new_routes = self._copy_for_mutate(routes, [veh_id])
         part1 = group[:split_pos]
         part2 = group[split_pos:]
         
         new_routes[veh_id][g_idx] = part1
         new_routes[veh_id].insert(g_idx + 1, part2)
         
-        new_emp_loc = self.rebuild_location_map(new_routes)
+        new_emp_loc = self.rebuild_location_map(new_routes) if rebuild_map else {}
         return new_routes, new_emp_loc, set(unassigned)
 
     # ============================================================================
@@ -286,9 +305,11 @@ class LocalSearch:
                 target_groups = routes.get(target_veh_id, [])
                 for g_idx, group in enumerate(target_groups):
                     if target_veh_id == current_veh and g_idx == current_g: continue
-                    new_routes, _, _ = self.apply_relocate(routes, emp_location, unassigned, emp_id, target_veh_id, g_idx, len(group))
-                    served, score = self.calculate_objective(new_routes)
-                    if served >= current_served and score < current_score - 0.001:
+                    new_routes, _, _ = self.apply_relocate(routes, emp_location, unassigned, emp_id, target_veh_id, g_idx, len(group), rebuild_map=False)
+                    feasible, d_served, d_score = self.evaluate_move_delta(routes, new_routes, [current_veh, target_veh_id])
+                    served = current_served + d_served
+                    score = current_score + d_score
+                    if feasible and served >= current_served and score < current_score - 0.001:
                         def make_apply(eid, vid, gid, pos):
                             return lambda r, el, ua: self.apply_relocate(r, el, ua, eid, vid, gid, pos)
                         moves.append(Move('relocate', score - current_score, served - current_served, [emp_id], [current_veh, target_veh_id], make_apply(emp_id, target_veh_id, g_idx, len(group))))
@@ -301,10 +322,12 @@ class LocalSearch:
         for _ in range(80):
             if len(emp_list) < 2: break
             e1, e2 = random.sample(emp_list, 2)
-            new_routes, _, _ = self.apply_swap(routes, emp_location, unassigned, e1, e2)
+            new_routes, _, _ = self.apply_swap(routes, emp_location, unassigned, e1, e2, rebuild_map=False)
             if not new_routes: continue
-            served, score = self.calculate_objective(new_routes)
-            if served >= current_served and score < current_score - 0.001:
+            feasible, d_served, d_score = self.evaluate_move_delta(routes, new_routes, [emp_location[e1][0], emp_location[e2][0]])
+            served = current_served + d_served
+            score = current_score + d_score
+            if feasible and served >= current_served and score < current_score - 0.001:
                  def make_apply(x, y):
                      return lambda r, el, ua: self.apply_swap(r, el, ua, x, y)
                  moves.append(Move('swap', score - current_score, served - current_served, [e1, e2], [], make_apply(e1, e2)))
@@ -321,9 +344,11 @@ class LocalSearch:
                      if len(group) < 3: break
                      i = random.randint(0, len(group)-3)
                      j = random.randint(i+2, len(group)-1)
-                     new_routes, _, _ = self.apply_2opt(routes, emp_location, unassigned, veh_id, g_idx, i, j)
-                     served, score = self.calculate_objective(new_routes)
-                     if served >= current_served and score < current_score - 0.001:
+                     new_routes, _, _ = self.apply_2opt(routes, emp_location, unassigned, veh_id, g_idx, i, j, rebuild_map=False)
+                     feasible, d_served, d_score = self.evaluate_move_delta(routes, new_routes, [veh_id])
+                     served = current_served + d_served
+                     score = current_score + d_score
+                     if feasible and served >= current_served and score < current_score - 0.001:
                          def make_apply(v, g, s, e):
                              return lambda r, el, ua: self.apply_2opt(r, el, ua, v, g, s, e)
                          moves.append(Move('2opt', score - current_score, 0, group[i:j+1], [veh_id], make_apply(veh_id, g_idx, i, j)))
@@ -357,11 +382,12 @@ class LocalSearch:
                          rem_len = len(group) - seg_len
                          insert_pos = random.randint(0, rem_len)
                          
-                         new_routes, _, _ = self.apply_oropt(routes, emp_location, unassigned, veh_id, g_idx, start, end, insert_pos)
+                         new_routes, _, _ = self.apply_oropt(routes, emp_location, unassigned, veh_id, g_idx, start, end, insert_pos, rebuild_map=False)
                          if not new_routes: continue
-                         
-                         served, score = self.calculate_objective(new_routes)
-                         if served >= current_served and score < current_score - 0.001:
+                         feasible, d_served, d_score = self.evaluate_move_delta(routes, new_routes, [veh_id])
+                         served = current_served + d_served
+                         score = current_score + d_score
+                         if feasible and served >= current_served and score < current_score - 0.001:
                             def make_apply(v, g, s, e, p):
                                 return lambda r, el, ua: self.apply_oropt(r, el, ua, v, g, s, e, p)
                             moves.append(Move('oropt', score - current_score, 0, group[start:end], [veh_id], make_apply(veh_id, g_idx, start, end, insert_pos)))
@@ -379,11 +405,12 @@ class LocalSearch:
              ga = random.randint(0, len(routes[va]) - 1)
              gb = random.randint(0, len(routes[vb]) - 1)
              
-             new_routes, _, _ = self.apply_exchange_groups(routes, emp_location, unassigned, va, ga, vb, gb)
+             new_routes, _, _ = self.apply_exchange_groups(routes, emp_location, unassigned, va, ga, vb, gb, rebuild_map=False)
              if not new_routes: continue
-             
-             served, score = self.calculate_objective(new_routes)
-             if served >= current_served and score < current_score - 0.001:
+             feasible, d_served, d_score = self.evaluate_move_delta(routes, new_routes, [va, vb])
+             served = current_served + d_served
+             score = current_score + d_score
+             if feasible and served >= current_served and score < current_score - 0.001:
                 def make_apply(v1, g1, v2, g2):
                     return lambda r, el, ua: self.apply_exchange_groups(r, el, ua, v1, g1, v2, g2)
                 moves.append(Move('exchange_groups', score - current_score, 0, [], [va, vb], make_apply(va, ga, vb, gb)))
@@ -401,11 +428,12 @@ class LocalSearch:
                  groups = routes[vid]
                  g1, g2 = random.sample(range(len(groups)), 2)
                  
-                 new_routes, _, _ = self.apply_merge_groups(routes, emp_location, unassigned, vid, g1, g2)
+                 new_routes, _, _ = self.apply_merge_groups(routes, emp_location, unassigned, vid, g1, g2, rebuild_map=False)
                  if not new_routes: continue
-                 
-                 served, score = self.calculate_objective(new_routes)
-                 if served >= current_served and score < current_score - 0.001:
+                 feasible, d_served, d_score = self.evaluate_move_delta(routes, new_routes, [vid])
+                 served = current_served + d_served
+                 score = current_score + d_score
+                 if feasible and served >= current_served and score < current_score - 0.001:
                     def make_apply(v, ga, gb):
                         return lambda r, el, ua: self.apply_merge_groups(r, el, ua, v, ga, gb)
                     moves.append(Move('merge_groups', score - current_score, 0, [], [vid], make_apply(vid, g1, g2)))
@@ -422,11 +450,12 @@ class LocalSearch:
                  group = groups[g_idx]
                  split_pos = random.randint(1, len(group)-1)
                  
-                 new_routes, _, _ = self.apply_split_group(routes, emp_location, unassigned, vid, g_idx, split_pos)
+                 new_routes, _, _ = self.apply_split_group(routes, emp_location, unassigned, vid, g_idx, split_pos, rebuild_map=False)
                  if not new_routes: continue
-                 
-                 served, score = self.calculate_objective(new_routes)
-                 if served >= current_served and score < current_score - 0.001:
+                 feasible, d_served, d_score = self.evaluate_move_delta(routes, new_routes, [vid])
+                 served = current_served + d_served
+                 score = current_score + d_score
+                 if feasible and served >= current_served and score < current_score - 0.001:
                      def make_apply(v, g, p):
                          return lambda r, el, ua: self.apply_split_group(r, el, ua, v, g, p)
                      moves.append(Move('split_group', score - current_score, 0, [], [vid], make_apply(vid, g_idx, split_pos)))

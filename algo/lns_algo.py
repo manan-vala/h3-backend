@@ -21,6 +21,7 @@ class LNSOptimizer:
         self.employees, self.vehicles = load_data_from_bytes(file_bytes)
         self.dist_matrix = DistanceMatrix(matrix_edge_list)
         self.simulator = RouteSimulator(self.employees, self.vehicles, self.dist_matrix, allow_violations=True)
+        self.simulator_cache = {}
         
         # Default Weights - penalized heavily to prevent "soft" violations
         self.weights_dict = {'w1': W1, 'w2': W2, 'w3': W3, 'w4': W4}
@@ -39,6 +40,14 @@ class LNSOptimizer:
         self.best_score = score
         # print(f"Initial Score: {score:.2f}")
 
+    def simulate_cached(self, veh_id, groups):
+        if not groups:
+            return True, {'total_cost':0, 'total_time':0, 'sharing_penalty':0, 'vehicle_penalty':0, 'violation_penalty':0, 'hard_violation_count':0}
+        key = veh_id + ':' + '|'.join(','.join(g) for g in groups)
+        if key not in self.simulator_cache:
+            self.simulator_cache[key] = self.simulator.simulate_vehicle(veh_id, groups)
+        return self.simulator_cache[key]
+
     def evaluate(self, routes):
         total_cost = 0.0
         total_penalty = 0.0
@@ -48,7 +57,7 @@ class LNSOptimizer:
         
         for veh_id, groups in routes.items():
             if not groups: continue
-            feasible, m = self.simulator.simulate_vehicle(veh_id, groups)
+            feasible, m = self.simulate_cached(veh_id, groups)
             served_count += sum(len(g) for g in groups)
             total_hard_violations += m.get('hard_violation_count', 0)
             
@@ -159,9 +168,9 @@ class LNSOptimizer:
             for vid, groups in current_routes.items():
                 for g_idx, group in enumerate(groups):
                     for pos in range(len(group) + 1):
-                        temp = copy.deepcopy(groups)
-                        temp[g_idx].insert(pos, eid)
-                        _, m = self.simulator.simulate_vehicle(vid, temp)
+                        test_group = group[:pos] + [eid] + group[pos:]
+                        test_groups = groups[:g_idx] + [test_group] + groups[g_idx+1:]
+                        _, m = self.simulate_cached(vid, test_groups)
                         cost = (self.w_cost*m['total_cost'] + self.w_time*m['total_time'] + 
                                 self.w_sharing*m['sharing_penalty'] + self.w_vehicle*m['vehicle_penalty'] + 
                                 m['violation_penalty'])
@@ -170,7 +179,7 @@ class LNSOptimizer:
             for vid in self.vehicles:
                 groups = current_routes.get(vid, [])
                 temp = groups + [[eid]]
-                _, m = self.simulator.simulate_vehicle(vid, temp)
+                _, m = self.simulate_cached(vid, temp)
                 cost = (self.w_cost*m['total_cost'] + self.w_time*m['total_time'] + 
                         self.w_sharing*m['sharing_penalty'] + self.w_vehicle*m['vehicle_penalty'] + 
                         m['violation_penalty'])
@@ -193,16 +202,16 @@ class LNSOptimizer:
                 for vid, groups in current_routes.items():
                     for g_idx, group in enumerate(groups):
                         for pos in range(len(group) + 1):
-                            temp = copy.deepcopy(groups)
-                            temp[g_idx].insert(pos, eid)
-                            _, m = self.simulator.simulate_vehicle(vid, temp)
+                            test_group = group[:pos] + [eid] + group[pos:]
+                            test_groups = groups[:g_idx] + [test_group] + groups[g_idx+1:]
+                            _, m = self.simulate_cached(vid, test_groups)
                             costs.append(((self.w_cost*m['total_cost'] + self.w_time*m['total_time'] + 
                                            self.w_sharing*m['sharing_penalty'] + self.w_vehicle*m['vehicle_penalty'] + 
                                            m['violation_penalty']), vid, g_idx, pos, False))
                 for vid in self.vehicles:
                     gs = current_routes.get(vid, [])
                     temp = gs + [[eid]]
-                    _, m = self.simulator.simulate_vehicle(vid, temp)
+                    _, m = self.simulate_cached(vid, temp)
                     costs.append(((self.w_cost*m['total_cost'] + self.w_time*m['total_time'] + 
                                    self.w_sharing*m['sharing_penalty'] + self.w_vehicle*m['vehicle_penalty'] + 
                                    m['violation_penalty']), vid, len(gs), 0, True))
@@ -286,7 +295,7 @@ class LNSOptimizer:
 
         for veh_id, groups in self.best_routes.items():
             if not groups: continue
-            feasible, m = self.simulator.simulate_vehicle(veh_id, groups)
+            feasible, m = self.simulate_cached(veh_id, groups)
             vehicle = self.vehicles[veh_id]
             
             route_links = []
