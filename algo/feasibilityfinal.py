@@ -63,6 +63,8 @@ def get_feasibility_score(file_bytes, matrix_edge_list, solution_json):
             dist_km, travel_time_min = dist_matrix.get_dist_dur(
                 curr_loc, target_loc, speed_kmph=veh.speed)
             
+            # accumulate travel time
+            total_time_min += travel_time_min
             total_cost += dist_km * veh.cost_per_km
             arrival_time = curr_time + travel_time_min
             
@@ -86,6 +88,10 @@ def get_feasibility_score(file_bytes, matrix_edge_list, solution_json):
                 
                 emp = employees_raw[eid]
                 pickup_time = max(arrival_time, emp.earliest_pickup)
+                # if we wait for the employee we should include the waiting time
+                wait_time = pickup_time - arrival_time
+                if wait_time > 0:
+                    total_time_min += wait_time
                 
                 if eid in served_ids:
                     hard_count += 1 # Duplicate

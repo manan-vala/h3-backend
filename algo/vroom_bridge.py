@@ -18,11 +18,11 @@ Then set VROOM_PYTHON in vroom_solver.py to:
 import sys
 import json
 import math
-import os
 import base64
 from io import BytesIO
 
 try:
+    import vroom_matrix_patch
     import vroom
     import pandas as pd
 except ImportError as e:
@@ -30,9 +30,17 @@ except ImportError as e:
     sys.exit(1)
 
 
-# ─── Helpers ────────────────────────────────────────────────────────────────
+# ─── Constants ───────────────────────────────────────────────────────────────
 
-def haversine(lat1, lon1, lat2, lon2):
+# Road factor: real road distance is ~30% longer than straight-line haversine.
+# Must match the same factor used in lns_utils.py so that feasibility scoring
+# (get_feasibility_score) evaluates all solvers on a consistent distance basis.
+ROAD_FACTOR = 1.3
+
+
+# ─── Helpers ─────────────────────────────────────────────────────────────────
+
+def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     R = 6371.0
     dlat = math.radians(lat2 - lat1)
     dlon = math.radians(lon2 - lon1)
@@ -42,22 +50,35 @@ def haversine(lat1, lon1, lat2, lon2):
     return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
-def parse_time_to_seconds(t_val):
+def parse_time_to_seconds(t_val) -> int:
+    """
+    Convert a variety of time representations to integer seconds since midnight.
+
+    Handles:
+      - datetime.time / datetime.datetime objects
+      - Strings in "HH:MM" or "HH:MM:SS" format, optionally prefixed with a date
+      - Excel time fractions (float in [0.0, 1.0) where 0.375 == 09:00)
+      - NaN / empty → returns 0
+    """
     if pd.isna(t_val) or t_val == "":
         return 0
     if hasattr(t_val, 'hour'):
         return (t_val.hour * 60 + t_val.minute) * 60
+    # Excel stores times as a fraction of a 24-hour day (0.0–<1.0)
+    if isinstance(t_val, float) and 0.0 <= t_val < 1.0:
+        return round(t_val * 86400)
     s = str(t_val).strip()
     try:
+        # Handle "YYYY-MM-DD HH:MM:SS" — take only the time part
         if " " in s:
             s = s.split(" ")[-1]
         parts = s.split(":")
         return (int(parts[0]) * 60 + int(parts[1])) * 60
-    except:
+    except Exception:
         return 0
 
 
-# ─── Core solve ─────────────────────────────────────────────────────────────
+# ─── Core solve ──────────────────────────────────────────────────────────────
 
 def solve(payload: dict) -> dict:
     """
@@ -70,29 +91,37 @@ def solve(payload: dict) -> dict:
     W1 = float(payload.get("W1_COST", 0.7))
     W2 = float(payload.get("W2_TIME", 0.3))
 
-    xls       = pd.ExcelFile(BytesIO(file_bytes))
-    df_empl   = pd.read_excel(xls, "employees")
-    df_vehi   = pd.read_excel(xls, "vehicles")
-    df_meta   = pd.read_excel(xls, "metadata")
+    xls      = pd.ExcelFile(BytesIO(file_bytes))
+    df_empl  = pd.read_excel(xls, "employees")
+    df_vehi  = pd.read_excel(xls, "vehicles")
+    df_meta  = pd.read_excel(xls, "metadata")
+
+    # Ensure DataFrames have a clean 0-based RangeIndex so that iloc[v_id-1]
+    # always corresponds correctly to the vehicle registered with id=i+1.
+    df_vehi  = df_vehi.reset_index(drop=True)
+    df_empl  = df_empl.reset_index(drop=True)
 
     # Priority delays (seconds)
-    priority_delays = {}
+    priority_delays: dict[int, int] = {}
     for _, row in df_meta.iterrows():
         key = str(row["key"])
         if key.startswith("priority_") and key.endswith("_max_delay_min"):
             try:
                 level = int(key.split("_")[1])
                 priority_delays[level] = int(float(row["value"]) * 60)
-            except:
+            except Exception:
                 pass
 
-    # Build unified location index
-    all_locations = []
-    def get_loc_idx(lat, lon):
+    # ── Build unified location index (O(1) lookups via dict) ─────────────────
+    all_locations: list[tuple[float, float]] = []
+    _loc_index: dict[tuple[float, float], int] = {}
+
+    def get_loc_idx(lat, lon) -> int:
         loc = (float(lat), float(lon))
-        if loc not in all_locations:
+        if loc not in _loc_index:
+            _loc_index[loc] = len(all_locations)
             all_locations.append(loc)
-        return all_locations.index(loc)
+        return _loc_index[loc]
 
     for _, v in df_vehi.iterrows():
         get_loc_idx(v["current_lat"], v["current_lng"])
@@ -100,28 +129,28 @@ def solve(payload: dict) -> dict:
         get_loc_idx(e["pickup_lat"], e["pickup_lng"])
         get_loc_idx(e["drop_lat"],   e["drop_lng"])
 
-    # Distance matrix (km)
+    # Distance matrix (km), with road factor matching lns_utils.py
     dist_km = [
-        [haversine(l1[0], l1[1], l2[0], l2[1]) for l2 in all_locations]
+        [haversine(l1[0], l1[1], l2[0], l2[1]) * ROAD_FACTOR for l2 in all_locations]
         for l1 in all_locations
     ]
 
     problem = vroom.Input(amount_size=1)
 
-    veh_int_to_str = {}
-    veh_cap        = {}
+    veh_int_to_str: dict[int, str] = {}
+    veh_cap: dict[int, int] = {}
 
     for i, v in df_vehi.iterrows():
-        v_int  = i + 1
-        v_str  = str(v["vehicle_id"])
+        v_int    = i + 1                          # 1-based VROOM vehicle id
+        v_str    = str(v["vehicle_id"])
         veh_int_to_str[v_int] = v_str
-        cap                   = int(v["capacity"])
-        veh_cap[v_int]        = cap
-        speed_kps             = float(v["avg_speed_kmph"]) / 3600.0
-        cpk                   = float(v["cost_per_km"])
-        profile               = f"veh_{v_str}"
+        cap      = int(v["capacity"])
+        veh_cap[v_int] = cap
+        speed_kps = float(v["avg_speed_kmph"]) / 3600.0   # km/s
+        cpk       = float(v["cost_per_km"])
+        profile   = f"veh_{v_str}"
 
-        dur_mat  = [
+        dur_mat = [
             [int(math.ceil(d / speed_kps)) if speed_kps > 0 else 0 for d in row]
             for row in dist_km
         ]
@@ -144,97 +173,159 @@ def solve(payload: dict) -> dict:
             time_window=[avail_s, 86400],
         )])
 
-    job_int_to_str = {}
+    # Maps from VROOM integer job id back to employee string id and location indices.
+    # Stored upfront so that output formatting doesn't need to re-scan df_empl.
+    job_int_to_str: dict[int, str] = {}
+    job_int_to_pickup_idx: dict[int, int] = {}
+    job_int_to_drop_idx: dict[int, int] = {}
+
     for i, e in df_empl.iterrows():
-        j_int = i + 1
-        job_int_to_str[j_int] = str(e["employee_id"])
-        p_idx = get_loc_idx(e["pickup_lat"], e["pickup_lng"])
-        d_idx = get_loc_idx(e["drop_lat"],   e["drop_lng"])
-        t_pu  = int(parse_time_to_seconds(e["earliest_pickup"]))
-        t_dr  = int(parse_time_to_seconds(e["latest_drop"]))
-        buf   = priority_delays.get(int(e["priority"]), 0)
+        j_int = i + 1                             # 1-based VROOM job id
+        job_int_to_str[j_int]        = str(e["employee_id"])
+        job_int_to_pickup_idx[j_int] = get_loc_idx(e["pickup_lat"], e["pickup_lng"])
+        job_int_to_drop_idx[j_int]   = get_loc_idx(e["drop_lat"],   e["drop_lng"])
+
+        t_pu = int(parse_time_to_seconds(e["earliest_pickup"]))
+        t_dr = int(parse_time_to_seconds(e["latest_drop"]))
+        buf  = priority_delays.get(int(e["priority"]), 0)
 
         problem.add_shipment(
             pickup=vroom.ShipmentStep(
-                id=j_int * 10, location=p_idx,
+                id=j_int * 10, location=job_int_to_pickup_idx[j_int],
                 time_windows=[[t_pu, 86400]]),
             delivery=vroom.ShipmentStep(
-                id=j_int * 10 + 1, location=d_idx,
+                id=j_int * 10 + 1, location=job_int_to_drop_idx[j_int],
                 time_windows=[[0, t_dr + buf]]),
             amount=vroom.Amount([1]),
             priority=100,
         )
 
-    sol = problem.solve(exploration_level=5, nb_threads=4)
+    sol = problem.solve(exploration_level=5, nb_threads=2)
 
-    # ── Format output as route_sequence for solver.py ────────────────────────
-    def fmt_seconds(secs):
+    # ── Format output as route_sequence for solver.py ─────────────────────────
+    def fmt_seconds(secs: int) -> str:
         h = (secs // 3600) % 24
         m = (secs % 3600) // 60
         return f"{h:02d}:{m:02d}"
 
     output_vehicles = []
     total_cost      = 0.0
+    total_time_sec  = 0.0
 
     if not sol.routes.empty:
         for v_id, grp in sol.routes.groupby("vehicle_id"):
-            v_str = veh_int_to_str.get(v_id, str(v_id))
-            grp   = grp.sort_values("arrival")
+            v_str  = veh_int_to_str.get(v_id, str(v_id))
+            v_row  = df_vehi.iloc[v_id - 1]          # safe: df_vehi reset_index above
+            v_cpk  = float(v_row["cost_per_km"])
+            v_cat  = str(v_row.get("category", "standard")).lower()
 
-            # Build route_sequence
-            raw_seq = [{"location": v_str,
-                        "arrival_time":   "00:00",
-                        "departure_time": "00:00"}]
+            grp = grp.sort_values("arrival")
+
+            # ── Build raw_seq with loc_idx at every step ──────────────────────
+            # raw_seq is the authoritative source for distance calculation.
+            # It preserves every physical stop (including multiple "office" drops
+            # at different coordinates) without merging anything.
+            start_idx = get_loc_idx(v_row["current_lat"], v_row["current_lng"])
+            avail_s   = parse_time_to_seconds(v_row.get("available_from", "00:00"))
+            raw_seq = [{
+                "location":       v_str,
+                "arrival_time":   fmt_seconds(avail_s),
+                "departure_time": fmt_seconds(avail_s),
+                "loc_idx":        start_idx,
+            }]
 
             for _, row in grp.iterrows():
-                if row["type"] == "pickup":
-                    eid = job_int_to_str.get(int(row["id"]) // 10, "?")
+                row_type = row.get("type", "")
+                if row_type not in ("pickup", "delivery"):
+                    continue   # skip 'start' / 'end' meta-rows
+
+                arr = int(row["arrival"])
+                dep = int(row.get("departure", arr))
+                job_id = int(row["id"]) // 10       # decode: j*10 → j, j*10+1 → j
+
+                if row_type == "pickup":
                     raw_seq.append({
-                        "location":       eid,
-                        "arrival_time":   fmt_seconds(int(row["arrival"])),
-                        "departure_time": fmt_seconds(int(row["departure"])),
+                        "location":       job_int_to_str.get(job_id, "?"),
+                        "arrival_time":   fmt_seconds(arr),
+                        "departure_time": fmt_seconds(dep),
+                        "loc_idx":        job_int_to_pickup_idx.get(job_id),
                     })
-                elif row["type"] == "delivery":
+                else:  # delivery — use the actual drop location, NOT the vehicle depot
                     raw_seq.append({
                         "location":       "office",
-                        "arrival_time":   fmt_seconds(int(row["arrival"])),
-                        "departure_time": fmt_seconds(int(row["departure"])),
+                        "arrival_time":   fmt_seconds(arr),
+                        "departure_time": fmt_seconds(dep),
+                        "loc_idx":        job_int_to_drop_idx.get(job_id),
                     })
 
-            # Merge consecutive identical locations
+            # ── Merge consecutive stops at the same name AND same location ────
+            # Checking loc_idx prevents incorrectly merging two "office" drops
+            # that are physically at different coordinates.
             merged = []
             for s in raw_seq:
-                if not merged or s["location"] != merged[-1]["location"]:
-                    merged.append(dict(s))
-                else:
+                same_name = merged and s["location"] == merged[-1]["location"]
+                same_loc  = merged and s.get("loc_idx") == merged[-1].get("loc_idx")
+                if same_name and same_loc:
                     merged[-1]["departure_time"] = s["departure_time"]
+                else:
+                    merged.append(dict(s))
 
+            # ── Build final_seq (strip loc_idx, add step numbers) ─────────────
             final_seq = []
-            for i, s in enumerate(merged):
-                fs = {"step": i, "location": s["location"],
-                      "arrival_time": s["arrival_time"]}
-                if i < len(merged) - 1:
+            for idx, s in enumerate(merged):
+                fs = {
+                    "step":         idx,
+                    "location":     s["location"],
+                    "arrival_time": s["arrival_time"],
+                }
+                if idx < len(merged) - 1:
                     fs["departure_time"] = s["departure_time"]
                 final_seq.append(fs)
 
-            links = [f"{final_seq[i]['location']}_{final_seq[i+1]['location']}"
-                     for i in range(len(final_seq) - 1)]
+            links = [
+                f"{final_seq[i]['location']}_{final_seq[i+1]['location']}"
+                for i in range(len(final_seq) - 1)
+            ]
 
-            # Estimate cost (W1 * km * cost_per_km) — approximate
+            # ── Route time (from first pickup to last delivery) ───────────────
+            pickup_rows  = grp[grp["type"] == "pickup"]
+            delivery_rows = grp[grp["type"] == "delivery"]
+
+            if not pickup_rows.empty and not delivery_rows.empty:
+                route_start    = int(pickup_rows.iloc[0]["arrival"])
+                last_del       = delivery_rows.iloc[-1]
+                route_end      = int(last_del.get("departure", last_del["arrival"]))
+                route_time_sec = max(0, route_end - route_start)
+            else:
+                route_time_sec = 0
+
+            # ── Distance: walk raw_seq pairs using stored loc_idx ─────────────
+            route_distance_km = 0.0
+            for a, b in zip(raw_seq, raw_seq[1:]):
+                ai, bi = a.get("loc_idx"), b.get("loc_idx")
+                if ai is not None and bi is not None:
+                    route_distance_km += dist_km[ai][bi]
+
+            route_cost = W1 * v_cpk * route_distance_km + W2 * (route_time_sec / 60.0)
+            total_cost    += route_cost
+            total_time_sec += route_time_sec
+
             output_vehicles.append({
-                "vehicle_id":        v_str,
-                "vehicle_type":      "standard",
-                "capacity":          veh_cap.get(v_id, 0),
-                "avg_speed_kmph":    30.0,
-                "total_cost":        0.0,   # caller can re-score
-                "total_time_minutes": 0.0,
-                "total_steps":       len(final_seq),
-                "routes":            links,
-                "route_sequence":    final_seq,
+                "vehicle_id":         v_str,
+                "vehicle_type":       v_cat,          # actual category, not hardcoded
+                "capacity":           veh_cap.get(v_id, 0),
+                "avg_speed_kmph":     float(v_row["avg_speed_kmph"]),
+                "total_cost":         round(route_cost, 2),
+                "total_time_minutes": round(route_time_sec / 60.0, 2),
+                "total_steps":        len(final_seq),
+                "routes":             links,
+                "route_sequence":     final_seq,
             })
 
-    # Unassigned
-    unassigned = set()
+    # ── Unassigned employees ──────────────────────────────────────────────────
+    # VROOM marks both the pickup step (id = j*10) and delivery step (id = j*10+1)
+    # as unassigned. Both decode to the same j via // 10, and the set deduplicates.
+    unassigned: set[str] = set()
     if sol.unassigned:
         for job in sol.unassigned:
             eid = job_int_to_str.get(int(job._id) // 10)
@@ -242,13 +333,18 @@ def solve(payload: dict) -> dict:
                 unassigned.add(eid)
 
     return {
-        "vehicles": output_vehicles,
-        "unassigned": sorted(unassigned),
-        "summary": {"total_cost_all_vehicles": total_cost},
+        "routes":      output_vehicles,
+        "vehicles":    output_vehicles,   # backward compatibility with solver.py
+        "unassigned":  sorted(unassigned),
+        "summary": {
+            "cost":                      round(total_cost, 2),
+            "total_cost_all_vehicles":   round(total_cost, 2),
+            "time_minutes":              round(total_time_sec / 60.0, 2),
+        },
     }
 
 
-# ─── Entry point ────────────────────────────────────────────────────────────
+# ─── Entry point ─────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     try:

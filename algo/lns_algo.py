@@ -1,13 +1,12 @@
 import json
 import random
-import copy
 import time
 import math
 import os
 from collections import defaultdict
-from lns_utils import load_data_from_bytes, Employee, Vehicle, DistanceMatrix
-from lns_simulator import RouteSimulator
-from lns_local_search import LocalSearch
+from .lns_utils import load_data_from_bytes, Employee, Vehicle, DistanceMatrix
+from .lns_simulator import RouteSimulator
+from .lns_local_search import LocalSearch
 
 W1 = 1 # Cost penalty
 W2 = 1 # Time penalty
@@ -21,7 +20,6 @@ class LNSOptimizer:
         self.employees, self.vehicles = load_data_from_bytes(file_bytes)
         self.dist_matrix = DistanceMatrix(matrix_edge_list)
         self.simulator = RouteSimulator(self.employees, self.vehicles, self.dist_matrix, allow_violations=True)
-        self.simulator_cache = {}
         
         # Default Weights - penalized heavily to prevent "soft" violations
         self.weights_dict = {'w1': W1, 'w2': W2, 'w3': W3, 'w4': W4}
@@ -33,20 +31,20 @@ class LNSOptimizer:
         
         self.local_search = LocalSearch(self.employees, self.vehicles, self.weights_dict, self.simulator)
         self.current_routes = initial_sol if initial_sol else {}
-        self.best_routes = copy.deepcopy(self.current_routes)
+        self.best_routes = self._copy_routes(self.current_routes)
         self.best_score = float('inf')
         
         _, score, _ = self.evaluate(self.current_routes)
         self.best_score = score
         # print(f"Initial Score: {score:.2f}")
 
-    def simulate_cached(self, veh_id, groups):
-        if not groups:
-            return True, {'total_cost':0, 'total_time':0, 'sharing_penalty':0, 'vehicle_penalty':0, 'violation_penalty':0, 'hard_violation_count':0}
-        key = veh_id + ':' + '|'.join(','.join(g) for g in groups)
-        if key not in self.simulator_cache:
-            self.simulator_cache[key] = self.simulator.simulate_vehicle(veh_id, groups)
-        return self.simulator_cache[key]
+    def _copy_routes(self, routes):
+        """Manual shallow copy — safe because leaf values are immutable strings."""
+        return {k: [list(g) for g in v] for k, v in routes.items()}
+
+    def _copy_groups(self, groups):
+        """Copy a single vehicle's groups list."""
+        return [list(g) for g in groups]
 
     def evaluate(self, routes):
         total_cost = 0.0
@@ -57,7 +55,7 @@ class LNSOptimizer:
         
         for veh_id, groups in routes.items():
             if not groups: continue
-            feasible, m = self.simulate_cached(veh_id, groups)
+            feasible, m = self.simulator.simulate_vehicle(veh_id, groups)
             served_count += sum(len(g) for g in groups)
             total_hard_violations += m.get('hard_violation_count', 0)
             
@@ -92,7 +90,7 @@ class LNSOptimizer:
     # ========================================================================
     
     def destroy_random(self, routes, num_remove):
-        new_routes = copy.deepcopy(routes)
+        new_routes = self._copy_routes(routes)
         assigned = []
         for v, groups in new_routes.items():
             for g_i, group in enumerate(groups):
@@ -102,23 +100,25 @@ class LNSOptimizer:
         return self._rebuild_without(new_routes, set(removed)), removed
 
     def destroy_spatial(self, routes, num_remove):
-        new_routes = copy.deepcopy(routes)
+        new_routes = self._copy_routes(routes)
         assigned = []
         for v, groups in new_routes.items():
             for g in groups: assigned.extend(g)
         if not assigned: return new_routes, []
-        seed = self.employees[random.choice(assigned)]
+        seed_id = random.choice(assigned)
         dists = []
         for eid in assigned:
-            e = self.employees[eid]
-            d = (e.pickup_lat - seed.pickup_lat)**2 + (e.pickup_lng - seed.pickup_lng)**2
-            dists.append((d, eid))
+            # Use the distance matrix (haversine-based) for geographically correct clustering.
+            # Squared lat/lng differences are NOT proportional to real distance —
+            # 1° longitude at ~20°N latitude is ~103 km but 1° latitude is ~111 km.
+            dist_km, _ = self.dist_matrix.get_dist_dur(seed_id, eid)
+            dists.append((dist_km, eid))
         dists.sort(key=lambda x: x[0])
         removed = [x[1] for x in dists[:num_remove]]
         return self._rebuild_without(new_routes, set(removed)), removed
 
     def destroy_worst(self, routes, num_remove):
-        new_routes = copy.deepcopy(routes)
+        new_routes = self._copy_routes(routes)
         assigned = []
         for v, groups in new_routes.items():
             for g in groups:
@@ -137,7 +137,7 @@ class LNSOptimizer:
         return self._rebuild_without(new_routes, set(removed)), removed
 
     def destroy_route(self, routes, num_remove):
-        new_routes = copy.deepcopy(routes)
+        new_routes = self._copy_routes(routes)
         removed = []
         active = [v for v, gs in new_routes.items() if gs]
         if not active: return new_routes, []
@@ -160,32 +160,49 @@ class LNSOptimizer:
     # ========================================================================
 
     def repair_greedy(self, routes, unassigned_ids):
-        current_routes = copy.deepcopy(routes)
+        current_routes = self._copy_routes(routes)
         random.shuffle(unassigned_ids)
         for eid in unassigned_ids:
-            best_cost, best_move = float('inf'), None
-            # Existing
+            best_delta, best_move = float('inf'), None
+
+            # Pre-compute baseline cost for each vehicle so we measure MARGINAL insertion cost.
+            # Without this, vehicles with lower absolute route cost look cheaper even if
+            # adding eid to them costs more than adding to a vehicle with a higher baseline.
+            baseline_costs = {}
+            for vid, groups in current_routes.items():
+                _, m = self.simulator.simulate_vehicle(vid, groups)
+                baseline_costs[vid] = (self.w_cost*m['total_cost'] + self.w_time*m['total_time'] +
+                                       self.w_sharing*m['sharing_penalty'] + self.w_vehicle*m['vehicle_penalty'] +
+                                       m['violation_penalty'])
+
+            # Insert into an existing group
             for vid, groups in current_routes.items():
                 for g_idx, group in enumerate(groups):
                     for pos in range(len(group) + 1):
-                        test_group = group[:pos] + [eid] + group[pos:]
-                        test_groups = groups[:g_idx] + [test_group] + groups[g_idx+1:]
-                        _, m = self.simulate_cached(vid, test_groups)
-                        cost = (self.w_cost*m['total_cost'] + self.w_time*m['total_time'] + 
-                                self.w_sharing*m['sharing_penalty'] + self.w_vehicle*m['vehicle_penalty'] + 
-                                m['violation_penalty'])
-                        if cost < best_cost: best_cost, best_move = cost, (vid, g_idx, pos, False)
-            # New
+                        temp = self._copy_groups(groups)
+                        temp[g_idx].insert(pos, eid)
+                        _, m = self.simulator.simulate_vehicle(vid, temp)
+                        total = (self.w_cost*m['total_cost'] + self.w_time*m['total_time'] +
+                                 self.w_sharing*m['sharing_penalty'] + self.w_vehicle*m['vehicle_penalty'] +
+                                 m['violation_penalty'])
+                        delta = total - baseline_costs[vid]
+                        if delta < best_delta:
+                            best_delta, best_move = delta, (vid, g_idx, pos, False)
+
+            # Add as a new solo group on any vehicle (baseline is 0 for empty vehicles)
             for vid in self.vehicles:
-                groups = current_routes.get(vid, [])
-                temp = groups + [[eid]]
-                _, m = self.simulate_cached(vid, temp)
-                cost = (self.w_cost*m['total_cost'] + self.w_time*m['total_time'] + 
-                        self.w_sharing*m['sharing_penalty'] + self.w_vehicle*m['vehicle_penalty'] + 
-                        m['violation_penalty'])
-                if cost < best_cost: best_cost, best_move = cost, (vid, len(groups), 0, True)
-            
-            if best_move and best_cost < 500000.0:
+                if vid in current_routes:
+                    continue  # already evaluated above with existing groups
+                temp = [[eid]]
+                _, m = self.simulator.simulate_vehicle(vid, temp)
+                delta = (self.w_cost*m['total_cost'] + self.w_time*m['total_time'] +
+                         self.w_sharing*m['sharing_penalty'] + self.w_vehicle*m['vehicle_penalty'] +
+                         m['violation_penalty'])
+                if delta < best_delta:
+                    best_delta, best_move = delta, (vid, 0, 0, True)
+
+            # Only assign if marginal cost is less than leaving the employee unassigned
+            if best_move and best_delta < W5:
                 v, g, p, is_new = best_move
                 if v not in current_routes: current_routes[v] = []
                 if is_new: current_routes[v].append([eid])
@@ -193,30 +210,47 @@ class LNSOptimizer:
         return current_routes
 
     def repair_regret(self, routes, unassigned_ids, k=2):
-        current_routes = copy.deepcopy(routes)
+        current_routes = self._copy_routes(routes)
         unassigned = list(unassigned_ids)
         while unassigned:
             regrets = []
             for eid in unassigned:
                 costs = []
+
+                # Pre-compute baseline for marginal cost calculation
+                baseline_costs = {}
+                for vid, groups in current_routes.items():
+                    _, m = self.simulator.simulate_vehicle(vid, groups)
+                    baseline_costs[vid] = (self.w_cost*m['total_cost'] + self.w_time*m['total_time'] +
+                                           self.w_sharing*m['sharing_penalty'] + self.w_vehicle*m['vehicle_penalty'] +
+                                           m['violation_penalty'])
+
                 for vid, groups in current_routes.items():
                     for g_idx, group in enumerate(groups):
                         for pos in range(len(group) + 1):
-                            test_group = group[:pos] + [eid] + group[pos:]
-                            test_groups = groups[:g_idx] + [test_group] + groups[g_idx+1:]
-                            _, m = self.simulate_cached(vid, test_groups)
-                            costs.append(((self.w_cost*m['total_cost'] + self.w_time*m['total_time'] + 
-                                           self.w_sharing*m['sharing_penalty'] + self.w_vehicle*m['vehicle_penalty'] + 
-                                           m['violation_penalty']), vid, g_idx, pos, False))
+                            temp = self._copy_groups(groups)
+                            temp[g_idx].insert(pos, eid)
+                            _, m = self.simulator.simulate_vehicle(vid, temp)
+                            total = (self.w_cost*m['total_cost'] + self.w_time*m['total_time'] +
+                                     self.w_sharing*m['sharing_penalty'] + self.w_vehicle*m['vehicle_penalty'] +
+                                     m['violation_penalty'])
+                            delta = total - baseline_costs[vid]
+                            costs.append((delta, vid, g_idx, pos, False))
+
+                # New solo group on unoccupied vehicles
                 for vid in self.vehicles:
-                    gs = current_routes.get(vid, [])
-                    temp = gs + [[eid]]
-                    _, m = self.simulate_cached(vid, temp)
-                    costs.append(((self.w_cost*m['total_cost'] + self.w_time*m['total_time'] + 
-                                   self.w_sharing*m['sharing_penalty'] + self.w_vehicle*m['vehicle_penalty'] + 
-                                   m['violation_penalty']), vid, len(gs), 0, True))
+                    if vid in current_routes:
+                        continue
+                    temp = [[eid]]
+                    _, m = self.simulator.simulate_vehicle(vid, temp)
+                    delta = (self.w_cost*m['total_cost'] + self.w_time*m['total_time'] +
+                             self.w_sharing*m['sharing_penalty'] + self.w_vehicle*m['vehicle_penalty'] +
+                             m['violation_penalty'])
+                    costs.append((delta, vid, 0, 0, True))
+
                 costs.sort(key=lambda x: x[0])
-                valid = [c for c in costs if c[0] < 500000.0]
+                # Only consider insertions cheaper than leaving the employee unassigned
+                valid = [c for c in costs if c[0] < W5]
                 if not valid: regrets.append((-1, float('inf'), eid, None))
                 else:
                     best_c = valid[0][0]
@@ -246,14 +280,14 @@ class LNSOptimizer:
             # print(f"Repairing initial solution with {len(initial_unassigned)} unassigned...")
             self.current_routes = self.repair_regret(self.current_routes, initial_unassigned, k=2)
             _, score, _ = self.evaluate(self.current_routes)
-            self.best_score, self.best_routes = score, copy.deepcopy(self.current_routes)
+            self.best_score, self.best_routes = score, self._copy_routes(self.current_routes)
             # print(f"Repaired Initial Score: {score:.2f}")
 
         T, cooling = 1000.0, 0.995
         for i in range(max_iterations):
             iter_dest = random.uniform(0.1, 0.6)
             num_remove = max(1, int(num_employees * iter_dest))
-            temp_routes = copy.deepcopy(self.current_routes)
+            temp_routes = self._copy_routes(self.current_routes)
             
             r_val = random.random()
             if r_val < 0.25:
@@ -279,7 +313,7 @@ class LNSOptimizer:
             delta = score - self.best_score
             if score < self.best_score:
                 # print(f"Iter {i}: NEW BEST! {score:.2f} | Hard: {metrics['hard_vio_count']}")
-                self.best_score, self.best_routes, self.current_routes = score, copy.deepcopy(temp_routes), temp_routes
+                self.best_score, self.best_routes, self.current_routes = score, self._copy_routes(temp_routes), temp_routes
             elif random.random() < math.exp(-delta / max(T, 0.1)):
                 self.current_routes = temp_routes
             T *= cooling
@@ -295,7 +329,7 @@ class LNSOptimizer:
 
         for veh_id, groups in self.best_routes.items():
             if not groups: continue
-            feasible, m = self.simulate_cached(veh_id, groups)
+            feasible, m = self.simulator.simulate_vehicle(veh_id, groups)
             vehicle = self.vehicles[veh_id]
             
             route_links = []

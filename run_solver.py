@@ -114,10 +114,10 @@ def main():
     # 6. Quick summary ────────────────────────────────────────────────────────
     vehicles_used = len(result.get("vehicles", []))
     total_cost    = result.get("summary", {}).get("total_cost_all_vehicles", "N/A")
-    print(f"\n── Summary ──────────────────────────")
+    print("\n" + "-" * 30 + " Summary " + "-" * 30)
     print(f"   Vehicles used : {vehicles_used}")
     print(f"   Total cost    : {total_cost}")
-    print(f"─────────────────────────────────────\n")
+    print("-" * 61 + "\n")
 
 
 if __name__ == "__main__":

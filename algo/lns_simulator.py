@@ -1,5 +1,5 @@
 from typing import Dict, List, Tuple
-from lns_utils import Employee, Vehicle, DistanceMatrix
+from .lns_utils import Employee, Vehicle, DistanceMatrix
 
 class RouteSimulator:
     def __init__(self, employees: Dict[str, Employee], vehicles: Dict[str, Vehicle], 
@@ -64,7 +64,7 @@ class RouteSimulator:
             # --- Pickups ---
             for emp_id in group:
                 emp = self.employees[emp_id]
-                dist, travel_time = self.dist_matrix.get_dist_dur(curr_loc, emp_id)
+                dist, travel_time = self.dist_matrix.get_dist_dur(curr_loc, emp_id, speed_kmph=vehicle.speed)
                 arrival_time = curr_time + travel_time
                 pickup_time = max(arrival_time, emp.earliest_pickup)
                 wait_time = pickup_time - arrival_time
@@ -87,7 +87,7 @@ class RouteSimulator:
             # --- Drop-off ---
             # Assumption: All employees in a group are dropped at "office"
             office_id = "office"
-            dist_to_office, travel_time_to_office = self.dist_matrix.get_dist_dur(curr_loc, office_id)
+            dist_to_office, travel_time_to_office = self.dist_matrix.get_dist_dur(curr_loc, office_id, speed_kmph=vehicle.speed)
             drop_time = curr_time + travel_time_to_office
             
             total_distance += dist_to_office

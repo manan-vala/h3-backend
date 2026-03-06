@@ -1,72 +1,79 @@
-from .lns_algo import LNSOptimizer
-from .vroom_solver import solve_vroom
 import json
 import importlib.util
 import sys
 import os
+import threading
 import concurrent.futures
-from multiprocessing import Manager
+from .lns_algo import LNSOptimizer
+from .vroom_solver import solve_vroom
 from .feasibilityfinal import get_feasibility_score
+
+# sys.modules is shared across all threads. Guard the dynamic import so that
+# concurrent calls to solve_vrp() don't race when registering the ALNS module.
+_import_lock = threading.Lock()
 
 # Trick to import 16-02.py which is not a valid python module name
 def import_custom_module(module_name, file_path):
-    spec = importlib.util.spec_from_file_location(module_name, file_path)
-    module = importlib.util.module_from_spec(spec)
-    # Tell Python this module lives inside the 'algo' package so that
-    # relative imports (e.g. `from .lns_utils import ...`) work correctly.
-    module.__package__ = __package__  # same package as solver.py ("algo")
-    sys.modules[module_name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
-def _run_lns(file_bytes, matrix_edge_list):
-    lns = LNSOptimizer(file_bytes, matrix_edge_list)
-    lns.optimize(max_iterations=100)
-    return lns.get_formatted_output()
-
-
-def _run_alns(input_data, matrix_edge_list, file_bytes, result_ref):
-    curr_dir = os.path.dirname(__file__)
-    alns_mod = import_custom_module("alns_solver_16_02", os.path.join(curr_dir, "16-02.py"))
-    return alns_mod.solve_alns(input_data, matrix_edge_list, file_bytes, result_ref)
-
-
-def _run_vroom(input_data, matrix_edge_list, file_bytes):
-    return solve_vroom(input_data, matrix_edge_list, file_bytes)
-
+    with _import_lock:
+        if module_name in sys.modules:
+            return sys.modules[module_name]
+        spec = importlib.util.spec_from_file_location(module_name, file_path)
+        module = importlib.util.module_from_spec(spec)
+        # Tell Python this module lives inside the 'algo' package so that
+        # relative imports (e.g. `from .lns_utils import ...`) work correctly.
+        module.__package__ = __package__  # same package as solver.py ("algo")
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+        return module
 
 def solve_vrp(input_data, matrix_edge_list, file_bytes):
     """
-    Main Solver Function that tries multiple algorithms concurrently and picks the best.
+    Main Solver Function that tries multiple algorithms in parallel and picks the best.
     """
     solutions = []
-    
-    with Manager() as manager:
-        alns_result_ref = manager.list([None])
-        futures = {}
-        
-        with concurrent.futures.ProcessPoolExecutor(max_workers=3) as executor:
-            futures['LNS'] = executor.submit(_run_lns, file_bytes, matrix_edge_list)
-            futures['ALNS'] = executor.submit(_run_alns, input_data, matrix_edge_list, file_bytes, alns_result_ref)
-            futures['VROOM'] = executor.submit(_run_vroom, input_data, matrix_edge_list, file_bytes)
-            
-            for name, fut in futures.items():
-                try:
-                    # Time cap of 15 mins for each solver as stated
-                    result = fut.result(timeout=900)
-                    solutions.append((name, result))
-                except concurrent.futures.TimeoutError:
-                    if name == 'ALNS':
-                        if alns_result_ref[0] is not None:
-                            print("ALNS Solver timed out – using best partial result found so far.")
-                            solutions.append(("ALNS", alns_result_ref[0]))
-                        else:
-                            print("ALNS Solver timed out with no partial result, skipping.")
-                    else:
-                        print(f"{name} Solver timed out.")
-                except Exception as e:
-                    print(f"{name} Solver failed: {e}")
+
+    # ── Worker functions (each runs in its own thread) ────────────────────────
+
+    def run_lns():
+        lns = LNSOptimizer(file_bytes, matrix_edge_list)
+        lns.optimize(max_iterations=100)
+        return ("LNS", lns.get_formatted_output())
+
+    def run_alns():
+        curr_dir = os.path.dirname(__file__)
+        alns_mod = import_custom_module(
+            "alns_solver_16_02", os.path.join(curr_dir, "16-02.py"))
+        result_ref = [None]  # shared container written by ALNS thread
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            fut = pool.submit(alns_mod.solve_alns,
+                              input_data, matrix_edge_list, file_bytes, result_ref)
+            try:
+                alns_res = fut.result(timeout=150)  # 150 s hard cap
+                return ("ALNS", alns_res)
+            except concurrent.futures.TimeoutError:
+                if result_ref[0] is not None:
+                    print("ALNS Solver timed out – using best partial result found so far.")
+                    return ("ALNS", result_ref[0])
+                else:
+                    raise RuntimeError("ALNS Solver timed out with no partial result")
+
+    def run_vroom():
+        return ("VROOM", solve_vroom(input_data, matrix_edge_list, file_bytes))
+
+    # ── Run all three solvers concurrently ────────────────────────────────────
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        futures = {
+            executor.submit(run_lns):   "LNS",
+            executor.submit(run_alns):  "ALNS",
+            executor.submit(run_vroom): "VROOM",
+        }
+        for fut in concurrent.futures.as_completed(futures):
+            name = futures[fut]
+            try:
+                solutions.append(fut.result())
+            except Exception as e:
+                print(f"{name} Solver failed: {e}")
 
     if not solutions:
         raise Exception("All solvers failed")
@@ -96,4 +103,3 @@ def solve_vrp(input_data, matrix_edge_list, file_bytes):
 
     print(f"Selected Best Solver: {best_overall[0]}")
     return best_overall[1]
-

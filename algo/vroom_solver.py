@@ -1,29 +1,42 @@
 """
-vroom_solver.py  –  Calls vroom_bridge.py via subprocess in a Python 3.9/3.10 venv
-===================================================================================
-Because pyvroom's C extension is incompatible with Python 3.11/3.12 (numpy 2.x ABI
-break), VROOM runs in a separate lightweight venv:
+vroom_solver.py  –  Calls vroom_bridge.py via an isolated subprocess venv
+==========================================================================
+ROOT CAUSE OF THE ABI CRASH
+----------------------------
+pyvroom's PyPI wheels (including the cp312 builds) were compiled with pybind11
+< 2.12 and numpy 1.x headers.  pybind11 bakes numpy dtype format strings into
+the .so at compile-time.  When numpy 2.x is installed at *runtime* those
+strings no longer match, so even passing a plain Python list to
+set_durations_matrix() triggers "Incompatible buffer format!" because pybind11's
+type-caster probes numpy's buffer protocol as a fallback path.
 
-  ONE-TIME SETUP
-  --------------
-  # Install Python 3.10 from https://www.python.org/downloads/
-  # (tick "Add to PATH" or use the py launcher)
+CHOSEN FIX: isolated venv (Python 3.12 + numpy<2)
+---------------------------------------------------
+The main venv keeps numpy 2.x untouched.  A small sidecar venv named
+`vroom_env` carries pyvroom + numpy<2.  vroom_solver.py talks to it via
+subprocess / JSON / stdin, which is the architecture already in place.
 
-  py -3.10 -m venv vroom_env
-  vroom_env\\Scripts\\pip install pyvroom pandas openpyxl
+ONE-TIME SETUP (Windows – py launcher)
+---------------------------------------
+  py -3.12 -m venv vroom_env
+  vroom_env\\Scripts\\pip install "numpy<2" pyvroom pandas openpyxl
 
-  Then update VROOM_PYTHON below to point to that venv's python.exe
+ONE-TIME SETUP (Mac / Linux)
+-----------------------------
+  python3.12 -m venv vroom_env
+  vroom_env/bin/pip install "numpy<2" pyvroom pandas openpyxl
 
-  ALTERNATIVE (if python 3.10 not installed):
-    conda create -n vroom310 python=3.10
-    conda activate vroom310
-    pip install pyvroom pandas openpyxl
-    # set VROOM_PYTHON to the conda env's python.exe
+ALTERNATIVE – auto-setup
+-------------------------
+  python setup_vroom_env.py          # ships alongside this file
 
-  ENVIRONMENT VARIABLE
-  --------------------
-  You can also set the env var VROOM_PYTHON_EXE instead of editing this file.
+ENVIRONMENT VARIABLE OVERRIDE
+------------------------------
+  set VROOM_PYTHON_EXE=C:\\path\\to\\vroom_env\\Scripts\\python.exe
+  # export VROOM_PYTHON_EXE=/path/to/vroom_env/bin/python   (Mac/Linux)
 """
+
+from __future__ import annotations
 
 import base64
 import json
@@ -31,39 +44,173 @@ import os
 import subprocess
 import sys
 
-# ── Path to the Python 3.9/3.10 executable that has pyvroom installed ────────
-# Priority: env var  >  this file  >  skip VROOM
-_VROOM_PYTHON = (
-    os.environ.get("VROOM_PYTHON_EXE")          # 1. env var override
-    or r"vroom_env\Scripts\python.exe"           # 2. local venv (relative to h3-backend/)
-    # or r"C:\Python310\python.exe"              # 3. uncomment if using system Python 3.10
-    # or r"C:\ProgramData\Miniconda3\envs\vroom310\python.exe"  # conda
+# ---------------------------------------------------------------------------
+# Location resolution
+# ---------------------------------------------------------------------------
+
+# _HERE is the directory that contains this very file (i.e. algo/)
+_HERE = os.path.dirname(os.path.abspath(__file__))
+
+# Root of the back-end project (parent of algo/)
+_BACKEND_ROOT = os.path.dirname(_HERE)
+
+# The bridge script lives next to this file
+_BRIDGE_SCRIPT = os.path.join(_HERE, "vroom_bridge.py")
+
+# Platform-aware venv python path
+_VENV_PYTHON_REL = (
+    os.path.join("vroom_env", "Scripts", "python.exe")   # Windows
+    if sys.platform == "win32"
+    else os.path.join("vroom_env", "bin", "python")       # Mac / Linux
 )
 
-_BRIDGE_SCRIPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vroom_bridge.py")
+_CACHED_PYTHON_EXE = None
 
-
-def solve_vroom(input_data, matrix_edge_list, file_bytes):
+def _resolve_python_exe() -> str:
     """
-    Call vroom_bridge.py in the Python 3.9/3.10 subprocess.
-    Returns a dict in the route_sequence format expected by solver.py.
-    Raises RuntimeError if VROOM is unavailable or fails.
-    """
-    # Resolve python exe path relative to h3-backend/
-    here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # h3-backend/
-    python_exe = os.path.join(here, _VROOM_PYTHON) if not os.path.isabs(_VROOM_PYTHON) else _VROOM_PYTHON
+    Return the path of a Python interpreter that has a working pyvroom
+    (i.e. pyvroom compiled against numpy<2).
 
-    if not os.path.isfile(python_exe):
-        raise RuntimeError(
-            f"VROOM Python not found at '{python_exe}'. "
-            "Run setup: py -3.10 -m venv vroom_env && vroom_env\\Scripts\\pip install pyvroom pandas openpyxl"
+    Resolution order
+    ----------------
+    1. VROOM_PYTHON_EXE environment variable  (absolute or relative to cwd)
+    2. vroom_env inside the back-end root     (the recommended isolated venv)
+    3. vroom_env relative to cwd              (fallback for unusual layouts)
+
+    Raises RuntimeError with actionable instructions if nothing is found.
+
+    NOTE: we deliberately do NOT fall back to sys.executable (the main venv).
+    The main venv carries numpy 2.x which is ABI-incompatible with the
+    pyvroom wheel.  Falling back to sys.executable would silently reproduce
+    the "Incompatible buffer format" crash every time.
+    """
+    global _CACHED_PYTHON_EXE
+    if _CACHED_PYTHON_EXE is not None:
+        return _CACHED_PYTHON_EXE
+    candidates: list[tuple[str, str]] = []
+
+    env_override = os.environ.get("VROOM_PYTHON_EXE", "").strip()
+    if env_override:
+        path = env_override if os.path.isabs(env_override) else os.path.join(os.getcwd(), env_override)
+        candidates.append(("VROOM_PYTHON_EXE env var", path))
+
+    candidates.append((
+        "vroom_env in back-end root",
+        os.path.join(_BACKEND_ROOT, _VENV_PYTHON_REL),
+    ))
+    candidates.append((
+        "vroom_env relative to cwd",
+        os.path.join(os.getcwd(), _VENV_PYTHON_REL),
+    ))
+
+    for label, path in candidates:
+        if os.path.isfile(path):
+            # Quick sanity-check: make sure pyvroom is importable and that the
+            # numpy version inside the venv is < 2 (the whole point of isolation).
+            ok, reason = _probe_venv(path)
+            if ok:
+                _CACHED_PYTHON_EXE = path
+                return path
+            # Found the exe but it fails the probe — warn and keep looking.
+            print(
+                f"[vroom_solver] WARNING: found python at '{label}' ({path}) "
+                f"but it failed the compatibility probe: {reason}",
+                file=sys.stderr,
+            )
+
+    # Nothing usable found → give the developer a concrete fix.
+    raise RuntimeError(
+        "No compatible VROOM Python found.\n\n"
+        "Quick fix — create an isolated venv with numpy<2:\n\n"
+        "  Windows:\n"
+        "    py -3.12 -m venv vroom_env\n"
+        '    vroom_env\\Scripts\\pip install "numpy<2" pyvroom pandas openpyxl\n\n'
+        "  Mac / Linux:\n"
+        "    python3.12 -m venv vroom_env\n"
+        '    vroom_env/bin/pip install "numpy<2" pyvroom pandas openpyxl\n\n'
+        "Or run:  python setup_vroom_env.py\n\n"
+        "Then re-run your command."
+    )
+
+
+def _probe_venv(python_exe: str) -> tuple[bool, str]:
+    """
+    Launch *python_exe* and verify that:
+      (a) pyvroom is importable
+      (b) numpy version in that venv is < 2.0 (ABI-safe for installed pyvroom wheels)
+
+    Returns (True, "") on success or (False, reason_string) on failure.
+    Deliberately avoids importing pyvroom in *this* process to keep the main
+    venv's numpy 2.x from tainting anything.
+    """
+    probe = (
+        "import sys, os\n"
+        "# ensure our workspace's algo directory (where vroom_matrix_patch lives)\n"
+        "# is on the child interpreter's path so that the patch can be imported\n"
+        "sys.path.insert(0, os.path.join(os.getcwd(), 'algo'))\n"
+        "try:\n"
+        "    import vroom_matrix_patch\n"
+        "except ImportError:\n"
+        "    pass\n"
+        "try:\n"
+        "    import numpy as np\n"
+        "    major = int(np.__version__.split('.')[0])\n"
+        "    if major >= 2:\n"
+        "        print(f'numpy {np.__version__} >= 2 — ABI incompatible with pyvroom wheels', file=sys.stderr)\n"
+        "        sys.exit(2)\n"
+        "except ImportError:\n"
+        "    print('numpy not installed', file=sys.stderr); sys.exit(3)\n"
+        "try:\n"
+        "    import vroom\n"
+        "except ImportError as e:\n"
+        "    print(f'pyvroom not installed: {e}', file=sys.stderr); sys.exit(4)\n"
+        "# Quick functional test — the exact call that triggers the ABI crash\n"
+        "p = vroom.Input()\n"
+        "p.set_durations_matrix(profile='car', matrix_input=[[0,1],[1,0]])\n"
+        "print('ok')\n"
+    )
+    try:
+        result = subprocess.run(
+            [python_exe, "-c", probe],
+            capture_output=True, text=True, timeout=15,
         )
+    except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
+        return False, str(exc)
 
-    # Send input as JSON via stdin (base64-encode the xlsx bytes)
+    if result.returncode == 0 and result.stdout.strip() == "ok":
+        return True, ""
+    return False, (result.stderr.strip() or f"exit code {result.returncode}")
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+def solve_vroom(
+    input_data: dict,
+    matrix_edge_list: list,
+    file_bytes: bytes,
+) -> dict:
+    """
+    Dispatch the VRP problem to vroom_bridge.py running inside the isolated
+    venv and return the route-sequence dict expected by solver.py.
+
+    Parameters
+    ----------
+    input_data      : reserved for future use (currently unused by bridge)
+    matrix_edge_list: reserved for future use (currently unused by bridge)
+    file_bytes      : raw bytes of the .xlsx input workbook
+
+    Raises
+    ------
+    RuntimeError    : VROOM unavailable, bridge crashed, or returned an error
+    """
+    python_exe = _resolve_python_exe()
+
     payload = json.dumps({
         "file_b64": base64.b64encode(file_bytes).decode(),
-        "W1_COST":  0.7,
-        "W2_TIME":  0.3,
+        "W1_COST": 0.7,
+        "W2_TIME": 0.3,
     })
 
     try:
@@ -72,23 +219,35 @@ def solve_vroom(input_data, matrix_edge_list, file_bytes):
             input=payload,
             capture_output=True,
             text=True,
-            timeout=60,           # give VROOM up to 60 s
+            timeout=120,
         )
     except subprocess.TimeoutExpired:
-        raise RuntimeError("VROOM bridge timed out after 60s")
+        raise RuntimeError("VROOM bridge timed out after 120 s")
     except FileNotFoundError:
-        raise RuntimeError(f"Could not launch '{python_exe}'")
+        raise RuntimeError(f"Could not launch VROOM Python at '{python_exe}'")
 
     if proc.returncode != 0:
         stderr = proc.stderr.strip()
-        raise RuntimeError(f"VROOM bridge exited {proc.returncode}: {stderr}")
+        # Provide an actionable hint for the one error that led to this redesign.
+        if "Incompatible buffer format" in stderr:
+            stderr += (
+                "\n\n*** ABI mismatch detected ***\n"
+                "The pyvroom wheel in the vroom_env was compiled against numpy 1.x\n"
+                "but a numpy 2.x runtime is present.  Fix:\n"
+                "  pip install --upgrade-strategy eager \"numpy<2\" (inside vroom_env)\n"
+                "or re-run:  python setup_vroom_env.py --recreate"
+            )
+        raise RuntimeError(f"VROOM bridge exited {proc.returncode}:\n{stderr}")
 
     try:
         result = json.loads(proc.stdout)
-    except json.JSONDecodeError as e:
-        raise RuntimeError(f"VROOM bridge returned invalid JSON: {e}\nOutput: {proc.stdout[:500]}")
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(
+            f"VROOM bridge returned invalid JSON: {exc}\n"
+            f"First 500 chars of output:\n{proc.stdout[:500]}"
+        )
 
     if "error" in result:
-        raise RuntimeError(f"VROOM bridge error: {result['error']}")
+        raise RuntimeError(f"VROOM bridge returned an error: {result['error']}")
 
     return result
