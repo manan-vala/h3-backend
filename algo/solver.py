@@ -107,4 +107,4 @@ def solve_vrp(input_data, matrix_edge_list, file_bytes):
         best_overall = min(valid_sols, key=lambda x: (-x[2]['served_count'], effective_objective(x[2])))
 
     print(f"Selected Best Solver: {best_overall[0]}")
-    return best_overall[1], best_overall[2]
+    return best_overall[1], best_overall[2], best_overall[0]
