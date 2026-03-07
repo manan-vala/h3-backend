@@ -22,7 +22,7 @@ def get_feasibility_score(file_bytes, matrix_edge_list, solution_json):
     # We need metadata for weights and delays
     from io import BytesIO
     excel_file = BytesIO(file_bytes)
-    meta_df = pd.read_excel(excel_file, sheet_name='metadata')
+    meta_df = pd.read_excel(excel_file, sheet_name='metadata', engine='openpyxl')
     meta = dict(zip(meta_df['key'], meta_df['value']))
     
     Wc = float(meta.get('objective_cost_weight', 0.6))

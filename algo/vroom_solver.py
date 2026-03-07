@@ -43,6 +43,8 @@ import json
 import os
 import subprocess
 import sys
+from dotenv import load_dotenv
+load_dotenv()  # load .env into os.environ before _resolve_python_exe runs
 
 # ---------------------------------------------------------------------------
 # Location resolution

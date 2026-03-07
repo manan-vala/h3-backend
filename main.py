@@ -107,7 +107,13 @@ async def start_processing(
     # 3. Serialize payload for Redis/Celery and dispatch
     try:
         payload_dict = payload.model_dump()
-        task = process_optimization_task.delay(payload_dict, temp_filename)
+        # Read from the saved temp file (the UploadFile stream is already exhausted)
+        with open(temp_filename, "rb") as fb:
+            file_bytes = fb.read()
+        # Base64-encode so the bytes survive Celery's JSON serializer
+        import base64
+        file_bytes_b64 = base64.b64encode(file_bytes).decode("ascii")
+        task = process_optimization_task.delay(payload_dict, temp_filename, file_bytes_b64)
         logger.info(f"[API] Task dispatched to Celery. task_id={task.id}")
     except Exception as e:
         logger.error(f"[API] Failed to dispatch task to Celery: {e}")

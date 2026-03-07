@@ -91,7 +91,7 @@ def solve(payload: dict) -> dict:
     W1 = float(payload.get("W1_COST", 0.7))
     W2 = float(payload.get("W2_TIME", 0.3))
 
-    xls      = pd.ExcelFile(BytesIO(file_bytes))
+    xls      = pd.ExcelFile(BytesIO(file_bytes), engine='openpyxl')
     df_empl  = pd.read_excel(xls, "employees")
     df_vehi  = pd.read_excel(xls, "vehicles")
     df_meta  = pd.read_excel(xls, "metadata")

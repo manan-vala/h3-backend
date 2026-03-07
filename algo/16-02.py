@@ -1054,9 +1054,9 @@ def solve_alns(input_data, matrix_edge_list, file_bytes, _result_ref=None):
     build_matrix(matrix_edge_list)
 
     excel_file   = BytesIO(file_bytes)
-    employees_df = pd.read_excel(excel_file, sheet_name='employees')
-    vehicles_df  = pd.read_excel(excel_file, sheet_name='vehicles')
-    meta_df      = pd.read_excel(excel_file, sheet_name='metadata')
+    employees_df = pd.read_excel(excel_file, sheet_name='employees', engine='openpyxl')
+    vehicles_df  = pd.read_excel(excel_file, sheet_name='vehicles', engine='openpyxl')
+    meta_df      = pd.read_excel(excel_file, sheet_name='metadata', engine='openpyxl')
     meta   = dict(zip(meta_df['key'], meta_df['value']))
     Wc     = float(meta.get('objective_cost_weight', 0.6))
     Wt     = float(meta.get('objective_time_weight', 0.4))

@@ -36,13 +36,17 @@ def run_async(coro):
         loop.close()
 
 @celery_app.task(bind=True)
-def process_optimization_task(self, payload_dict: dict, file_path: str):
+def process_optimization_task(self, payload_dict: dict, file_path: str, file_bytes_b64: str):
     """
     Background task to run the heavy routing algorithm.
     """
     task_start = time.time()
     logger.info(f"=== TASK STARTED (ID: {self.request.id}) ===")
     logger.info(f"Employees: {len(payload_dict.get('employees', []))}, Vehicles: {len(payload_dict.get('vehicles', []))}")
+
+    # Decode base64 file data back to raw bytes
+    import base64
+    file_bytes = base64.b64decode(file_bytes_b64)
 
     try:
         # 1. Reconstruct Pydantic payload
@@ -73,7 +77,7 @@ def process_optimization_task(self, payload_dict: dict, file_path: str):
         # 4. Run Optimization Algorithm
         logger.info("[Step 4/5] Running VRP solver...")
         step_start = time.time()
-        result_json = solve_vrp(payload_dict, matrix_edge_list)
+        result_json = solve_vrp(payload_dict, matrix_edge_list, file_bytes)
         vehicles_count = len(result_json.get("vehicles", []))
         logger.info(f"[Step 4/5] Solver done. {vehicles_count} vehicles in result ({time.time() - step_start:.1f}s)")
 

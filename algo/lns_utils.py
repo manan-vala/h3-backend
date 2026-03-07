@@ -95,9 +95,9 @@ def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 def load_data_from_bytes(file_bytes: bytes):
     excel_file = BytesIO(file_bytes)
-    emp_df = pd.read_excel(excel_file, sheet_name='employees')
-    veh_df = pd.read_excel(excel_file, sheet_name='vehicles')
-    meta_df = pd.read_excel(excel_file, sheet_name='metadata')
+    emp_df = pd.read_excel(excel_file, sheet_name='employees', engine='openpyxl')
+    veh_df = pd.read_excel(excel_file, sheet_name='vehicles', engine='openpyxl')
+    meta_df = pd.read_excel(excel_file, sheet_name='metadata', engine='openpyxl')
     
     # Parse max delays
     max_delays = {}
