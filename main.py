@@ -1,18 +1,28 @@
 from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Form
-from models import OptimizationRequest
-from router import MatrixService
-from logic import generate_routes
-from geometry_processor import enrich_with_geometries
-from algo.solver import solve_vrp
-import time
-import json
-import os
 from fastapi.middleware.cors import CORSMiddleware
+from models import OptimizationRequest
+from celery.result import AsyncResult
 from auth import router as auth_router, get_current_user
+from worker import celery_app, process_optimization_task
+import json
+import logging
+import os
+import uuid
+
+# --- File-based Logging (shared with worker) ---
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler("worker_debug.log", mode="a"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger("fastapi_main")
 
 app = FastAPI()
 
-#For Auth
+# For Auth
 app.include_router(auth_router)
 
 app.add_middleware(
@@ -23,91 +33,119 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Auth in testing phase
-# @app.post("/process-routes", dependencies=[Depends(get_current_user)])
-@app.post("/process-routes")
-async def process_routes(
+MAX_CONCURRENT_JOBS = 4  # same number as --concurrency
+
+def get_active_job_count() -> int:
+    inspector = celery_app.control.inspect(timeout=2.0)
+    active = inspector.active() or {}
+    reserved = inspector.reserved() or {}
+    
+    active_count = sum(len(tasks) for tasks in active.values())
+    reserved_count = sum(len(tasks) for tasks in reserved.values())
+    return active_count + reserved_count
+
+
+# Ensure the temporary directory exists for storing uploaded files
+TEMP_DIR = "temp_uploads"
+os.makedirs(TEMP_DIR, exist_ok=True)
+
+
+# --- Health Check: Verify Redis is alive ---
+@app.get("/health")
+async def health_check():
+    try:
+        # Ping Redis through Celery's connection
+        celery_app.control.ping(timeout=2.0)
+        return {"status": "ok", "redis": "connected"}
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        return {"status": "degraded", "redis": f"error: {e}"}
+
+
+# Endpoint 1: Receive the payload and start the background job
+# Auth in testing phase:
+# @app.post("/process-routes/start", dependencies=[Depends(get_current_user)])
+@app.post("/process-routes/start")
+async def start_processing(
     json_data: str = Form(...),
     file: UploadFile = File(...)
 ):
-    # Parse the JSON string into our Pydantic model
+    # Gate check
+    # intended to show error when redis or celery worker is unreachable
+    current_load = get_active_job_count()
+    if current_load >= MAX_CONCURRENT_JOBS:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Server is at capacity ({MAX_CONCURRENT_JOBS} jobs running). Please try again later."
+        )
+
+    logger.info(f"[API] /process-routes/start called. File: {file.filename}")
+    
+    # 1. Parse the JSON string into our Pydantic model
     try:
         raw = json.loads(json_data)
         payload = OptimizationRequest(**raw)
+        logger.info(f"[API] Parsed payload: {len(payload.employees)} employees, {len(payload.vehicles)} vehicles")
     except json.JSONDecodeError as e:
+        logger.error(f"[API] JSON parse error: {e}")
         raise HTTPException(status_code=400, detail=f"Invalid JSON in json_data: {e}")
     except Exception as e:
+        logger.error(f"[API] Validation error: {e}")
         raise HTTPException(status_code=422, detail=f"Validation error: {e}")
 
-    # print(payload)
-    start_time = time.time()
+    # 2. Save the Excel file to disk temporarily 
+    # (Since payloads can be up to 2MB, passing the file path to Celery is safest)
+    unique_id = str(uuid.uuid4())
+    temp_filename = f"{TEMP_DIR}/{unique_id}_{file.filename}"
     
-    # 1. Fetch Matrix (Math) - Fast
-    #    This gets the 2D grid from OSRM into memory
-    matrix = MatrixService(payload.employees, payload.vehicles)
-    success = await matrix.fetch_matrix()
-    
-    if not success:
-        raise HTTPException(status_code=500, detail="Failed to fetch matrix from OSRM")
-
-    # 2. Transform Matrix for Solver
-    #    Converts 2D grid -> List of Edges (e.g. [{'id': 'V01_E01', 'distance': 500}, ...])
-    #    This matches the 'TC01_results.json' format the algo expects.
-    matrix_edge_list = generate_routes(payload, matrix)
-    # print(json.dumps(matrix_edge_list, indent=2))
-    # print("space")
-    
-    # with open("matrix_edge_list.json", "w") as f:
-    #     json.dump(matrix_edge_list, f, indent=2)
-
-    # 3. Run Optimization (The Algo)
-    #    Passes the parsed input + the edge list + the original Excel file
     try:
-        # Convert Pydantic model to dict for the solver
-        payload_dict = payload.model_dump()
-        # print(json.dumps(payload_dict, indent=2))
-        
-        # with open("payload_dict.json", "w") as f:
-        #     json.dump(payload_dict, f, indent=2)
-
-        # Read the uploaded Excel file into bytes for the solver
-        file_bytes = await file.read()
-            
-        result_json = solve_vrp(payload_dict, matrix_edge_list, file_bytes)
-        
-        # with open("algo_output.json", "w") as f:
-        #     json.dump(result_json, f, indent=2)
-            
+        with open(temp_filename, "wb") as f:
+            f.write(await file.read())
     except Exception as e:
-        print(f"Algorithm Error: {e}")
-        raise HTTPException(status_code=500, detail=f"Algorithm failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to save uploaded file: {e}")
 
-    # 4. Fetch Geometries (Visuals)
-    #    Takes the algo output (routes list) and fetches Polyline strings from OSRM
-    final_json = await enrich_with_geometries(result_json, payload)
+    # 3. Serialize payload for Redis/Celery and dispatch
+    try:
+        payload_dict = payload.model_dump()
+        task = process_optimization_task.delay(payload_dict, temp_filename)
+        logger.info(f"[API] Task dispatched to Celery. task_id={task.id}")
+    except Exception as e:
+        logger.error(f"[API] Failed to dispatch task to Celery: {e}")
+        # Cleanup temp file if dispatch fails
+        if os.path.exists(temp_filename):
+            os.remove(temp_filename)
+        raise HTTPException(status_code=500, detail=f"Failed to queue task: {e}")
 
-    processing_time = time.time() - start_time
-    
-    # 5. Final Output
-    filename = getattr(payload, 'filename', 'unknown_case')
-    output_filename = f"{filename}_results.json"
-    
-    vehicle_count = len(final_json.get("vehicles", []))
-
-    final_output = {
-        "status": "success",
-        "metadata": {
-            "processed_pairs": vehicle_count,
-            "time_taken": f"{processing_time:.2f}s"
-        },
-        "data": final_json
+    # 4. Return receipt immediately
+    return {
+        "status": "queued", 
+        "task_id": task.id,
+        "message": "Optimization task started in the background."
     }
 
-    # Save locally (Optional)
-    try:
-        with open(output_filename, 'w') as f:
-            json.dump(final_output, f, indent=4)
-    except:
-        pass
 
-    return final_output
+# Endpoint 2: Poll for the status of the job
+# Auth in testing phase:
+# @app.get("/process-routes/status/{task_id}", dependencies=[Depends(get_current_user)])
+@app.get("/process-routes/status/{task_id}")
+async def get_processing_status(task_id: str):
+    task_result = AsyncResult(task_id, app=celery_app)
+    logger.info(f"[API] Status poll for task_id={task_id}, state={task_result.state}")
+
+    if task_result.state == 'PENDING' or task_result.state == 'STARTED':
+        return {"status": "processing"}
+
+    elif task_result.state == 'SUCCESS':
+        return {
+            "status": "completed",
+            "result": task_result.result
+        }
+
+    elif task_result.state == 'FAILURE':
+        return {
+            "status": "failed",
+            "error": str(task_result.info)
+        }
+
+    # Fallback for other states (e.g., REJECTED, REVOKED)
+    return {"status": task_result.state.lower()}
