@@ -77,7 +77,7 @@ def process_optimization_task(self, payload_dict: dict, file_path: str, file_byt
         # 4. Run Optimization Algorithm
         logger.info("[Step 4/5] Running VRP solver...")
         step_start = time.time()
-        result_json = solve_vrp(payload_dict, matrix_edge_list, file_bytes)
+        result_json, _score = solve_vrp(payload_dict, matrix_edge_list, file_bytes)
         vehicles_count = len(result_json.get("vehicles", []))
         logger.info(f"[Step 4/5] Solver done. {vehicles_count} vehicles in result ({time.time() - step_start:.1f}s)")
 

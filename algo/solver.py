@@ -88,18 +88,23 @@ def solve_vrp(input_data, matrix_edge_list, file_bytes):
     # Ranking criteria:
     # 1. strictly 0 hard constraint violations
     # 2. then compare the number of people serviced(higher is better) strictly
-    # 3. minimized objective cost and time(lower is better)
-    # 4. Number of soft constraints(lower is better)
-    
+    # 3. minimized effective objective (objective + soft_violation_penalty) (lower is better)
+    #    Each soft violation adds SOFT_VIOLATION_PENALTY to the objective for comparison.
+
+    SOFT_VIOLATION_PENALTY = 100  # 1 soft violation = 100 objective cost
+
+    def effective_objective(score):
+        return score['objective'] + score['soft_violations'] * SOFT_VIOLATION_PENALTY
+
     # Filter valid solutions (hard_violations == 0)
     valid_sols = [s for s in scored_solutions if s[2]['hard_violations'] == 0]
     
     if not valid_sols:
         # If no valid solutions, pick the one with least hard violations
-        best_overall = min(scored_solutions, key=lambda x: (x[2]['hard_violations'], -x[2]['served_count'], x[2]['objective'], x[2]['soft_violations']))
+        best_overall = min(scored_solutions, key=lambda x: (x[2]['hard_violations'], -x[2]['served_count'], effective_objective(x[2])))
     else:
         # Pick best from valid ones
-        best_overall = min(valid_sols, key=lambda x: (-x[2]['served_count'], x[2]['objective'], x[2]['soft_violations']))
+        best_overall = min(valid_sols, key=lambda x: (-x[2]['served_count'], effective_objective(x[2])))
 
     print(f"Selected Best Solver: {best_overall[0]}")
-    return best_overall[1]
+    return best_overall[1], best_overall[2]

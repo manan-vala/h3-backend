@@ -99,7 +99,7 @@ def main():
     print("\n[INFO] Starting solver …\n")
     t0 = time.time()
     try:
-        result = solve_vrp(input_data, matrix_edge_list, file_bytes)
+        result, score = solve_vrp(input_data, matrix_edge_list, file_bytes)
     except Exception as exc:
         sys.exit(f"[ERROR] Solver raised an exception:\n  {exc}")
     elapsed = time.time() - t0
@@ -114,9 +114,13 @@ def main():
     # 6. Quick summary ────────────────────────────────────────────────────────
     vehicles_used = len(result.get("vehicles", []))
     total_cost    = result.get("summary", {}).get("total_cost_all_vehicles", "N/A")
+    total_time    = score.get("total_time_min", "N/A")
+    objective     = score.get("objective", "N/A")
     print("\n" + "-" * 30 + " Summary " + "-" * 30)
     print(f"   Vehicles used : {vehicles_used}")
     print(f"   Total cost    : {total_cost}")
+    print(f"   Total time    : {total_time:.2f} min" if isinstance(total_time, (int, float)) else f"   Total time    : {total_time}")
+    print(f"   Objective     : {objective:.2f}" if isinstance(objective, (int, float)) else f"   Objective     : {objective}")
     print("-" * 61 + "\n")
 
 
