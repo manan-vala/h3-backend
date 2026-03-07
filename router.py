@@ -2,12 +2,14 @@ import httpx
 import asyncio
 import logging
 import random
+import os
 
 logger = logging.getLogger("celery_worker")
 
 # Configuration
-OSRM_TABLE_URL = "http://34.131.59.11:5000/table/v1/driving/"
-OSRM_ROUTE_URL = "http://34.131.59.11:5000/route/v1/driving/"
+OSRM_BASE = os.getenv("OSRM_URL", "http://34.131.59.11:5000")
+OSRM_TABLE_URL = f"{OSRM_BASE}/table/v1/driving/"
+OSRM_ROUTE_URL = f"{OSRM_BASE}/route/v1/driving/"
 
 class MatrixService:
     """

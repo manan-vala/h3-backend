@@ -24,11 +24,8 @@ logging.basicConfig(
 logger = logging.getLogger("celery_worker")
 
 # Initialize Celery pointing to local Redis
-celery_app = Celery(
-    "opti_worker",
-    broker="redis://localhost:6379/0",
-    backend="redis://localhost:6379/0"
-)
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+celery_app = Celery("opti_worker", broker=REDIS_URL, backend=REDIS_URL)
 
 def run_async(coro):
     """Safely bridge async code into a sync Celery worker context."""
