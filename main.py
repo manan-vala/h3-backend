@@ -33,6 +33,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+MAX_CONCURRENT_JOBS = 4  # same number as --concurrency
+
+def get_active_job_count() -> int:
+    inspector = celery_app.control.inspect(timeout=2.0)
+    active = inspector.active() or {}
+    reserved = inspector.reserved() or {}
+    
+    active_count = sum(len(tasks) for tasks in active.values())
+    reserved_count = sum(len(tasks) for tasks in reserved.values())
+    return active_count + reserved_count
+
+
 # Ensure the temporary directory exists for storing uploaded files
 TEMP_DIR = "temp_uploads"
 os.makedirs(TEMP_DIR, exist_ok=True)
@@ -58,6 +70,15 @@ async def start_processing(
     json_data: str = Form(...),
     file: UploadFile = File(...)
 ):
+    # Gate check
+    # intended to show error when redis or celery worker is unreachable
+    current_load = get_active_job_count()
+    if current_load >= MAX_CONCURRENT_JOBS:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Server is at capacity ({MAX_CONCURRENT_JOBS} jobs running). Please try again later."
+        )
+
     logger.info(f"[API] /process-routes/start called. File: {file.filename}")
     
     # 1. Parse the JSON string into our Pydantic model
