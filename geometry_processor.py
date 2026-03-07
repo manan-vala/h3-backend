@@ -33,7 +33,7 @@ async def enrich_with_geometries(schedule_data, input_payload):
     if not unique_tags:
         return schedule_data
 
-    print(f"🚀 Fetching geometry for {len(unique_tags)} segments...")
+    print(f"[GEO] Fetching geometry for {len(unique_tags)} segments...")
 
     # --- Step 3: Fetch Data ---
     router = RouteService(max_concurrency=50)
@@ -59,7 +59,7 @@ async def enrich_with_geometries(schedule_data, input_payload):
         if src and dst:
             tasks.append(router.fetch_geometry_safe(tag, src, dst))
         else:
-            print(f"❌ Missing coords: {tag}")
+            print(f"[ERROR] Missing coords: {tag}")
 
     results_list = await asyncio.gather(*tasks)
     await router.close()

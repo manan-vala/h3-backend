@@ -1,0 +1,12 @@
+Change solver.py to call vroom_solver and 16-02.py and lns(it is    
+already doing this) and select the best solution .
+
+change both vroom solver and 16-02.py to
+1) take input from the arguments passed in solver.py. matrix_edge list is ajson of the format same as matrixEdge list.json.
+2) take distances using matrix edge list instead of haversine
+3) change output json format to same as that of algo_output.json
+different paths give different output jsons i want you to pass all of them through                       
+feasibilityfinal.py and finally only return the best one. the way you calculate best is: 1. only         
+consider valid solutions if the number of hard constraint violations is 0 and strictly 0 only, 2.        
+then compare the number of people serviced(higher is better) strictly, if same -> 3. minimized           
+objective cost and time(lower is better) if equal-> 4. Number of soft constraints(lower is better).  
