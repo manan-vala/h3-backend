@@ -123,17 +123,75 @@ def solve(payload: dict) -> dict:
             all_locations.append(loc)
         return _loc_index[loc]
 
-    for _, v in df_vehi.iterrows():
-        get_loc_idx(v["current_lat"], v["current_lng"])
-    for _, e in df_empl.iterrows():
-        get_loc_idx(e["pickup_lat"], e["pickup_lng"])
-        get_loc_idx(e["drop_lat"],   e["drop_lng"])
+    # Also build a mapping from string IDs (vehicle_id, employee_id, "office")
+    # to location indices so we can look up OSRM matrix entries.
+    _id_to_loc_idx: dict[str, int] = {}
 
-    # Distance matrix (km), with road factor matching lns_utils.py
-    dist_km = [
-        [haversine(l1[0], l1[1], l2[0], l2[1]) * ROAD_FACTOR for l2 in all_locations]
-        for l1 in all_locations
-    ]
+    for _, v in df_vehi.iterrows():
+        idx = get_loc_idx(v["current_lat"], v["current_lng"])
+        _id_to_loc_idx[str(v["vehicle_id"])] = idx
+    for _, e in df_empl.iterrows():
+        idx_pickup = get_loc_idx(e["pickup_lat"], e["pickup_lng"])
+        idx_drop   = get_loc_idx(e["drop_lat"],   e["drop_lng"])
+        _id_to_loc_idx[str(e["employee_id"])] = idx_pickup
+        # "office" — all employees share the same drop location; first write wins,
+        # subsequent writes are the same index (same coords).
+        _id_to_loc_idx["office"] = idx_drop
+
+    # ── Build OSRM lookup: (loc_idx_from, loc_idx_to) → (km, seconds) ───────
+    matrix_edge_list = payload.get("matrix_edge_list") or []
+    _osrm_lookup: dict[tuple[int, int], tuple[float, float]] = {}
+
+    for entry in matrix_edge_list:
+        eid = entry.get("id", "")
+        parts = eid.split("_")
+        # Parse "{from}_{to}" — must match logic.py's naming convention.
+        # Handle "office" as a special keyword that can appear as prefix or suffix.
+        from_id = to_id = None
+        if len(parts) == 2:
+            from_id, to_id = parts[0], parts[1]
+        elif "office" in eid:
+            if eid.startswith("office_"):
+                from_id, to_id = "office", eid.replace("office_", "", 1)
+            elif eid.endswith("_office"):
+                from_id, to_id = eid.rsplit("_office", 1)[0], "office"
+        if from_id is None:
+            continue
+        idx_from = _id_to_loc_idx.get(from_id)
+        idx_to   = _id_to_loc_idx.get(to_id)
+        if idx_from is not None and idx_to is not None:
+            km  = entry["distance_meters"] / 1000.0
+            sec = entry["duration_seconds"]
+            _osrm_lookup[(idx_from, idx_to)] = (km, sec)
+
+    osrm_hit = len(_osrm_lookup)
+    n_locs   = len(all_locations)
+
+    # ── Build NxN distance (km) and duration (seconds) matrices ──────────────
+    # Use OSRM data when available, fall back to haversine × ROAD_FACTOR.
+    dist_km  = [[0.0] * n_locs for _ in range(n_locs)]
+    dur_sec  = [[0.0] * n_locs for _ in range(n_locs)]
+
+    OSRM_REFERENCE_SPEED_KMPH = 30.0  # assumed speed behind OSRM durations
+
+    for i in range(n_locs):
+        for j in range(n_locs):
+            if i == j:
+                continue
+            osrm = _osrm_lookup.get((i, j))
+            if osrm is not None:
+                dist_km[i][j] = osrm[0]
+                dur_sec[i][j] = osrm[1]
+            else:
+                # Haversine fallback with road factor
+                hav_km = haversine(all_locations[i][0], all_locations[i][1],
+                                   all_locations[j][0], all_locations[j][1]) * ROAD_FACTOR
+                dist_km[i][j] = hav_km
+                dur_sec[i][j] = (hav_km / OSRM_REFERENCE_SPEED_KMPH) * 3600.0
+
+    _pct = (osrm_hit / max(n_locs * (n_locs - 1), 1)) * 100
+    print(f"[VROOM] Matrix: {n_locs} locations, {osrm_hit} OSRM pairs "
+          f"({_pct:.0f}% coverage), rest haversine fallback", file=sys.stderr)
 
     problem = vroom.Input(amount_size=1)
 
@@ -146,19 +204,25 @@ def solve(payload: dict) -> dict:
         veh_int_to_str[v_int] = v_str
         cap      = int(v["capacity"])
         veh_cap[v_int] = cap
-        speed_kps = float(v["avg_speed_kmph"]) / 3600.0   # km/s
-        cpk       = float(v["cost_per_km"])
-        profile   = f"veh_{v_str}"
+        speed_kmph = float(v["avg_speed_kmph"])
+        cpk        = float(v["cost_per_km"])
+        profile    = f"veh_{v_str}"
+
+        # Scale OSRM durations by vehicle speed ratio.
+        # OSRM durations reflect real road speed limits (~30-50 km/h urban).
+        # If this vehicle is faster/slower, scale proportionally.
+        speed_ratio = OSRM_REFERENCE_SPEED_KMPH / speed_kmph if speed_kmph > 0 else 1.0
 
         dur_mat = [
-            [int(math.ceil(d / speed_kps)) if speed_kps > 0 else 0 for d in row]
-            for row in dist_km
+            [max(0, int(math.ceil(dur_sec[r][c] * speed_ratio)))
+             for c in range(n_locs)]
+            for r in range(n_locs)
         ]
         cost_mat = [
-            [int(100 * (W1 * cpk * d +
-                        W2 * (d / speed_kps / 60.0 if speed_kps > 0 else 0)))
-             for d in row]
-            for row in dist_km
+            [int(100 * (W1 * cpk * dist_km[r][c] +
+                        W2 * (dur_sec[r][c] * speed_ratio / 60.0)))
+             for c in range(n_locs)]
+            for r in range(n_locs)
         ]
 
         problem.set_durations_matrix(profile=profile, matrix_input=dur_mat)

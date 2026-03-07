@@ -200,7 +200,8 @@ def solve_vroom(
     Parameters
     ----------
     input_data      : reserved for future use (currently unused by bridge)
-    matrix_edge_list: reserved for future use (currently unused by bridge)
+    matrix_edge_list: OSRM distance/duration pairs from the Table API.
+                      Each entry: {id, type, distance_meters, duration_seconds, geometry}
     file_bytes      : raw bytes of the .xlsx input workbook
 
     Raises
@@ -209,8 +210,21 @@ def solve_vroom(
     """
     python_exe = _resolve_python_exe()
 
+    # Strip the unused 'geometry' field to reduce payload size over stdin.
+    # Each entry can carry a large polyline string; we only need distance/duration.
+    compact_matrix = [
+        {
+            "id": entry["id"],
+            "distance_meters": entry["distance_meters"],
+            "duration_seconds": entry["duration_seconds"],
+        }
+        for entry in (matrix_edge_list or [])
+        if entry.get("distance_meters") is not None
+    ] if matrix_edge_list else []
+
     payload = json.dumps({
         "file_b64": base64.b64encode(file_bytes).decode(),
+        "matrix_edge_list": compact_matrix,
         "W1_COST": 0.7,
         "W2_TIME": 0.3,
     })
