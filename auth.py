@@ -11,7 +11,7 @@ from database import Base, engine, get_db
 import os
 
 # --- CONFIGURATION ---
-SECRET_KEY = os.getenv("SECRET_KEY", "@General#Champions#Lohit@")
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
