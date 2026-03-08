@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from models import OptimizationRequest
 from celery.result import AsyncResult
 from auth import router as auth_router, get_current_user
+from test_routes import router as test_router
 from worker import celery_app, process_optimization_task
 from database import get_db
 from db_models import OptimizationRunLog  # ensures table is registered with Base
@@ -27,6 +28,10 @@ app = FastAPI()
 
 # For Auth
 app.include_router(auth_router)
+
+# For Testing
+# Remove in production
+app.include_router(test_router)
 
 app.add_middleware(
     CORSMiddleware,
