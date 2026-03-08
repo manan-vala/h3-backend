@@ -36,6 +36,8 @@ def get_feasibility_score(file_bytes, matrix_edge_list, solution_json):
     served_ids = set()
     hard_count = 0 
     soft_count = 0
+    hard_violation_details = []
+    soft_violation_details = []
     total_cost = 0.0
     total_time_min = 0.0
     share_limits = {'single': 1, 'double': 2, 'triple': 3}
@@ -76,8 +78,10 @@ def get_feasibility_score(file_bytes, matrix_edge_list, solution_json):
                     max_allowed = delays.get(str(emp.priority), 0.0)
                     if delay > max_allowed:
                         hard_count += 1
+                        hard_violation_details.append({"employee_id": eid, "type": "max_delay_exceeded", "delay": delay})
                     elif delay > 0:
                         soft_count += 1
+                        soft_violation_details.append({"employee_id": eid, "type": "late_dropoff", "delay": delay})
                 current_passengers = []
             else:
                 # Pickup
@@ -102,10 +106,12 @@ def get_feasibility_score(file_bytes, matrix_edge_list, solution_json):
                 # Check capacity
                 if len(current_passengers) > veh.capacity:
                     hard_count += 1
+                    hard_violation_details.append({"employee_id": eid, "type": "capacity_exceeded", "vehicle_id": vid})
                 
                 # Check soft constraints
                 if emp.vehicle_preference == "premium" and veh.category != "premium":
                     soft_count += 1
+                    soft_violation_details.append({"employee_id": eid, "type": "vehicle_preference_mismatch", "expected": "premium", "actual": veh.category})
                 
                 # Update current time to departure time
                 arrival_time = pickup_time # Start from when we actually pick up
@@ -120,8 +126,13 @@ def get_feasibility_score(file_bytes, matrix_edge_list, solution_json):
                 limit = share_limits.get(p_emp.sharing_preference, 999)
                 if group_size > limit:
                     soft_count += 1
+                    soft_violation_details.append({"employee_id": pid, "type": "sharing_preference_exceeded", "limit": limit, "actual": group_size})
 
     objective = (Wc * total_cost) + (Wt * total_time_min)
+
+    # Add details directly to the solution JSON
+    solution_json['soft_violation_details'] = soft_violation_details
+    solution_json['hard_violation_details'] = hard_violation_details
 
     return {
         "served_count": len(served_ids),
@@ -129,5 +140,7 @@ def get_feasibility_score(file_bytes, matrix_edge_list, solution_json):
         "soft_violations": soft_count,
         "objective": objective,
         "total_cost": total_cost,
-        "total_time_min": total_time_min
+        "total_time_min": total_time_min,
+        "soft_violation_details": soft_violation_details,
+        "hard_violation_details": hard_violation_details
     }

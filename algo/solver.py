@@ -91,7 +91,7 @@ def solve_vrp(input_data, matrix_edge_list, file_bytes):
     # 3. minimized effective objective (objective + soft_violation_penalty) (lower is better)
     #    Each soft violation adds SOFT_VIOLATION_PENALTY to the objective for comparison.
 
-    SOFT_VIOLATION_PENALTY = 100  # 1 soft violation = 100 objective cost
+    SOFT_VIOLATION_PENALTY = 50  # 1 soft violation = 50 objective cost
 
     def effective_objective(score):
         return score['objective'] + score['soft_violations'] * SOFT_VIOLATION_PENALTY
