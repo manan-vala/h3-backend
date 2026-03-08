@@ -10,6 +10,7 @@ from router import MatrixService
 from logic import generate_routes
 from geometry_processor import enrich_with_geometries
 from algo.solver import solve_vrp
+from optimization_logger import log_optimization_run
 
 # --- File-based Logging ---
 # All logs go to worker_debug.log so you can always check what happened
@@ -77,9 +78,10 @@ def process_optimization_task(self, payload_dict: dict, file_path: str, file_byt
         # 4. Run Optimization Algorithm
         logger.info("[Step 4/5] Running VRP solver...")
         step_start = time.time()
-        result_json, _score = solve_vrp(payload_dict, matrix_edge_list, file_bytes)
+        result_json, _score, winner_algorithm = solve_vrp(payload_dict, matrix_edge_list, file_bytes)
         vehicles_count = len(result_json.get("vehicles", []))
-        logger.info(f"[Step 4/5] Solver done. {vehicles_count} vehicles in result ({time.time() - step_start:.1f}s)")
+        algo_elapsed = time.time() - step_start
+        logger.info(f"[Step 4/5] Solver done. {vehicles_count} vehicles in result ({algo_elapsed:.1f}s)")
 
         # 5. Fetch Geometries (Bridging Async to Sync)
         logger.info("[Step 5/5] Fetching route geometries from OSRM...")
@@ -97,6 +99,27 @@ def process_optimization_task(self, payload_dict: dict, file_path: str, file_byt
 
         # Ensure result is JSON-serializable for Redis
         serializable_result = json.loads(json.dumps(final_json))
+
+        # --- Log successful run to PostgreSQL ---
+        try:
+            log_optimization_run(
+                filename=payload_dict.get("filename", "unknown"),
+                num_employees=len(payload_dict.get("employees", [])),
+                num_vehicles=len(payload_dict.get("vehicles", [])),
+                winner_algorithm=winner_algorithm,
+                employees_served=_score.get("served_count", 0),
+                hard_violations=_score.get("hard_violations", 0),
+                soft_violations=_score.get("soft_violations", 0),
+                objective_score=_score.get("objective", 0.0),
+                total_cost=_score.get("total_cost", 0.0),
+                total_time_min=_score.get("total_time_min", 0.0),
+                algo_duration_seconds=round(algo_elapsed, 2),
+                total_duration_seconds=round(total_time, 2),
+                celery_task_id=self.request.id,
+                vehicles_in_solution=vehicles_count,
+            )
+        except Exception as log_err:
+            logger.warning(f"Non-fatal: failed to log optimization run: {log_err}")
 
         logger.info(f"=== TASK COMPLETED (ID: {self.request.id}) Total: {total_time:.1f}s ===")
         return serializable_result

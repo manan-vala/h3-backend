@@ -1,9 +1,12 @@
-from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, Form, Query
 from fastapi.middleware.cors import CORSMiddleware
 from models import OptimizationRequest
 from celery.result import AsyncResult
 from auth import router as auth_router, get_current_user
 from worker import celery_app, process_optimization_task
+from database import get_db
+from db_models import OptimizationRunLog  # ensures table is registered with Base
+from sqlalchemy.orm import Session
 import json
 import logging
 import os
@@ -155,3 +158,41 @@ async def get_processing_status(task_id: str):
 
     # Fallback for other states (e.g., REJECTED, REVOKED)
     return {"status": task_result.state.lower()}
+
+
+# --- Optimization Run Logs ---
+@app.get("/optimization-logs")
+def get_optimization_logs(
+    limit: int = Query(default=50, ge=1, le=1000),
+    offset: int = Query(default=0, ge=0),
+    db: Session = Depends(get_db),
+):
+    """Return recent optimization run logs, newest first."""
+    rows = (
+        db.query(OptimizationRunLog)
+        .order_by(OptimizationRunLog.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+    return [
+        {
+            "id": r.id,
+            "created_at": r.created_at.isoformat() if r.created_at else None,
+            "filename": r.filename,
+            "num_employees": r.num_employees,
+            "num_vehicles": r.num_vehicles,
+            "winner_algorithm": r.winner_algorithm,
+            "employees_served": r.employees_served,
+            "hard_violations": r.hard_violations,
+            "soft_violations": r.soft_violations,
+            "objective_score": r.objective_score,
+            "total_cost": r.total_cost,
+            "total_time_min": r.total_time_min,
+            "algo_duration_seconds": r.algo_duration_seconds,
+            "total_duration_seconds": r.total_duration_seconds,
+            "celery_task_id": r.celery_task_id,
+            "vehicles_in_solution": r.vehicles_in_solution,
+        }
+        for r in rows
+    ]

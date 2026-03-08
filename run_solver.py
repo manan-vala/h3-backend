@@ -99,7 +99,7 @@ def main():
     print("\n[INFO] Starting solver …\n")
     t0 = time.time()
     try:
-        result, score = solve_vrp(input_data, matrix_edge_list, file_bytes)
+        result, score, winner = solve_vrp(input_data, matrix_edge_list, file_bytes)
     except Exception as exc:
         sys.exit(f"[ERROR] Solver raised an exception:\n  {exc}")
     elapsed = time.time() - t0
