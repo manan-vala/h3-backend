@@ -1,0 +1,76 @@
+version: "3.8"
+
+services:
+  # --- Database Backend ---
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: h3_database
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser -d h3_database"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- Message Broker & Result Backend ---
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # --- FastAPI Server ---
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    volumes:
+      - temp_data:/app/temp_uploads # Shared volume for file uploads
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://myuser:mypassword@db:5432/h3_database
+      # - OSRM_URL=http://your-osrm-server:5000 # Add if needed
+
+  # --- Celery Worker ---
+  worker:
+    build: .
+    command: celery -A worker.celery_app worker --loglevel=info --pool=solo
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    volumes:
+      - temp_data:/app/temp_uploads # Shared volume so worker can clean up API's files
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql://myuser:mypassword@db:5432/h3_database
+
+  # --- Celery Beat (Scheduled Tasks) ---
+  celery-beat:
+    build: .
+    command: celery -A worker.celery_app beat --loglevel=info
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+
+volumes:
+  postgres_data:
+  temp_data: # Defines the shared volume for the temp directory

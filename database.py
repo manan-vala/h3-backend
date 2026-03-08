@@ -1,14 +1,15 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-# LOCAL: Use SQLite for now. 
-# SCALABLE: Change this string to a PostgreSQL URL later (e.g., "postgresql://user:pass@localhost/db")
-SQLALCHEMY_DATABASE_URL = "sqlite:///./users.db"
-
-# connect_args is needed only for SQLite
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+# Using Postgres under the hood
+SQLALCHEMY_DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+psycopg2://kriti:kriti_pwd@localhost:5432/routeopti"
 )
+
+# create_engine options: pool_pre_ping avoids errors with stale DB connections.
+engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

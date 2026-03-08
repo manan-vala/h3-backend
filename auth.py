@@ -8,9 +8,10 @@ from typing import Optional
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from database import Base, engine, get_db
+import os
 
 # --- CONFIGURATION ---
-SECRET_KEY = "@General#Champions#Lohit@" # Env variable in production
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

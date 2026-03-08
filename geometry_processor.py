@@ -33,7 +33,7 @@ async def enrich_with_geometries(schedule_data, input_payload):
     if not unique_tags:
         return schedule_data
 
-    print(f"🚀 Fetching geometry for {len(unique_tags)} segments...")
+    print(f"[GEO] Fetching geometry for {len(unique_tags)} segments...")
 
     # --- Step 3: Fetch Data ---
     router = RouteService(max_concurrency=50)
@@ -41,11 +41,14 @@ async def enrich_with_geometries(schedule_data, input_payload):
 
     def parse_tag(tag):
         parts = tag.split('_')
-        # Logic to handle "office" or standard IDs
+        # IMPORTANT: This assumes IDs do NOT contain underscores.
+        # If IDs ever contain underscores (e.g. "EMP_001"), this will break.
         if len(parts) == 2: return parts[0], parts[1]
         if "office" in tag:
-            if tag.startswith("office_"): return "office", tag.replace("office_", "")
-            if tag.endswith("_office"): return tag.replace("_office", ""), "office"
+            if tag.startswith("office_"): return "office", tag.replace("office_", "", 1)
+            if tag.endswith("_office"): return tag.rsplit("_office", 1)[0], "office"
+        # Fallback: log a warning for ambiguous tags
+        print(f"Ambiguous route tag: '{tag}' — assuming first two parts")
         return parts[0], parts[1]
 
     for tag in unique_tags:
@@ -56,17 +59,40 @@ async def enrich_with_geometries(schedule_data, input_payload):
         if src and dst:
             tasks.append(router.fetch_geometry_safe(tag, src, dst))
         else:
-            print(f"❌ Missing coords: {tag}")
+            print(f"[ERROR] Missing coords: {tag}")
 
     results_list = await asyncio.gather(*tasks)
     await router.close()
 
-    # --- Step 4: Compress & Store ---
+    # # --- Step 4: Compress & Store (Old) ---
+    # geometry_map = {}
+    # for tag, coords in results_list:
+    #     if coords:
+    #         # OSRM = [lon, lat] -> Polyline = [lat, lon]
+    #         swapped_coords = [(p[1], p[0]) for p in coords]
+    #         geometry_map[tag] = polyline.encode(swapped_coords)
+    #     else:
+    #         geometry_map[tag] = ""
+
+    # --- Step 4: Compress & Store (New) ---
     geometry_map = {}
     for tag, coords in results_list:
         if coords:
-            # OSRM = [lon, lat] -> Polyline = [lat, lon]
+            # 1. OSRM = [lon, lat] -> Polyline = [lat, lon]
             swapped_coords = [(p[1], p[0]) for p in coords]
+            
+            # 2. Look up exact coordinates to fix the Snapping Gap
+            src_id, dst_id = parse_tag(tag)
+            src = coord_map.get(src_id)
+            dst = coord_map.get(dst_id)
+            
+            # 3. Inject exact points to visually bridge the route to the markers
+            if src:
+                swapped_coords.insert(0, src)
+            if dst:
+                swapped_coords.append(dst)
+                
+            # 4. Encode the complete path
             geometry_map[tag] = polyline.encode(swapped_coords)
         else:
             geometry_map[tag] = ""
