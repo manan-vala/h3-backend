@@ -41,6 +41,7 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.2.2
 python-jose==3.5.0
 python-multipart==0.0.22
+pyvroom==1.14.0
 PyYAML==6.0.3
 redis==6.2.0
 requests==2.32.5
