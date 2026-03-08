@@ -8,6 +8,10 @@ SQLALCHEMY_DATABASE_URL = os.getenv(
     "postgresql+psycopg2://kriti:kriti_pwd@localhost:5432/routeopti"
 )
 
+# Dokku and Heroku use 'postgres://', but SQLAlchemy 2.0+ requires 'postgresql://'
+if SQLALCHEMY_DATABASE_URL and SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 # create_engine options: pool_pre_ping avoids errors with stale DB connections.
 engine = create_engine(SQLALCHEMY_DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
